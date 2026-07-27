@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Log In - SentinelASM{% endblock %}
+{% block content %}
+    <h1>Welcome back</h1>
+    <div class="subtitle">Log in to SentinelASM</div>
+    <form method="POST" novalidate>
+        {{ form.hidden_tag() }}
+
+        <label for="{{ form.identity.id }}">Username or Email</label>
+        {{ form.identity(placeholder="jane_doe or you@example.com") }}
+        {% if form.identity.errors %}
+            <div class="field-errors">{{ form.identity.errors[0] }}</div>
+        {% endif %}
+
+        <label for="{{ form.password.id }}">Password</label>
+        {{ form.password(placeholder="••••••••") }}
+        {% if form.password.errors %}
+            <div class="field-errors">{{ form.password.errors[0] }}</div>
+        {% endif %}
+
+        <div class="checkbox-row">
+            {{ form.remember_me() }}
+            <label for="{{ form.remember_me.id }}" style="margin:0;">Remember me</label>
+        </div>
+
+        {{ form.submit() }}
+    </form>
+    <div class="links">
+        <a href="{{ url_for('auth.forgot_password') }}">Forgot your password?</a><br><br>
+        Don't have an account? <a href="{{ url_for('auth.register') }}">Register</a>
+    </div>
+{% endblock %}
