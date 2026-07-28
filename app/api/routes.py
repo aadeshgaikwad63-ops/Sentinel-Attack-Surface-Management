@@ -10,7 +10,8 @@ blueprints rather than extending this module.
 from flask import current_app, jsonify
 
 from app.api import api_bp
-from app.extensions import csrf
+from app.extensions import csrf 
+from app.scanner.scanner_manager import ScannerManager
 
 # Health checks are typically hit by load balancers/monitoring without a
 # CSRF-bearing session, so this namespace is exempt from CSRF checks.

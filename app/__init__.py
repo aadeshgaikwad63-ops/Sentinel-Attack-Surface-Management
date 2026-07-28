@@ -15,6 +15,7 @@ do not modify the blueprints already registered here.
 import os
 
 from flask import Flask
+#from flask_cors import CORS
 
 from app.extensions import csrf, db, limiter, login_manager, migrate
 from app.utils.logging import configure_logging
@@ -44,6 +45,7 @@ def create_app(config_name=None):
     os.makedirs(app.instance_path, exist_ok=True)
 
     _register_extensions(app)
+    CORS(app)
     _register_blueprints(app)
     _register_cli_commands(app)
 
@@ -72,13 +74,13 @@ def _register_blueprints(app):
     from app.auth import api_auth_bp, auth_bp
     from app.errors import errors_bp
     from app.profile import profile_bp
-   # from app.scan import scanner_bp
+    from app.scanner import scanner_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(api_auth_bp)
     app.register_blueprint(profile_bp)
     app.register_blueprint(api_bp)
-   # app.register_blueprint(scanner_bp)
+    app.register_blueprint(scanner_bp)
     app.register_blueprint(errors_bp)
 
     # Root route: redirect to login (kept minimal - dashboard team owns "/").

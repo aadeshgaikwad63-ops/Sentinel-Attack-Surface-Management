@@ -12,6 +12,8 @@ from flask import jsonify, request
 from app.extensions import csrf
 from app.scanner import scanner_bp
 from app.scanner.scanner_manager import ScannerManager
+from app.ai.scanner_adapter import ScannerAdapter
+from app.services.analysis_pipeline import AnalysisPipeline
 
 # Scanner APIs are consumed by JavaScript/AJAX requests.
 csrf.exempt(scanner_bp)
@@ -65,14 +67,18 @@ def scan():
 
     if not target:
         return jsonify(
-            {
-                "success": False,
-                "message": "Target is required."
-            }
-        ), 400
+    {
+        "success": True,
+        "scan_data": result.to_dict(),
+        "ai_analysis": analysis
+    }
+), 200
 
     try:
         result = scanner_manager.scan(target)
+        ai_input = ScannerAdapter.convert(result)
+
+        analysis = AnalysisPipeline().analyze(ai_input)
 
         return jsonify(
             {
