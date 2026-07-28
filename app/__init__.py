@@ -72,11 +72,13 @@ def _register_blueprints(app):
     from app.auth import api_auth_bp, auth_bp
     from app.errors import errors_bp
     from app.profile import profile_bp
+   # from app.scan import scanner_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(api_auth_bp)
     app.register_blueprint(profile_bp)
     app.register_blueprint(api_bp)
+   # app.register_blueprint(scanner_bp)
     app.register_blueprint(errors_bp)
 
     # Root route: redirect to login (kept minimal - dashboard team owns "/").

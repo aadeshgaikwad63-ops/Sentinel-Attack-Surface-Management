@@ -32,3 +32,10 @@ psycopg2-binary==2.9.10
 
 # Email validation
 email-validator==2.2.0
+python-nmap
+dnspython
+python-whois
+requests
+beautifulsoup4
+pyOpenSSL
+cryptography
