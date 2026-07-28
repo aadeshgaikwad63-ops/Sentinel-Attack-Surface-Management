@@ -42,6 +42,8 @@ class ScanResult:
 
     metadata: dict[str, Any] = field(default_factory=dict)
 
+    subdomains: list[dict[str, Any]] = field(default_factory=list)
+
     def to_dict(self) -> dict[str, Any]:
         """
         Convert the ScanResult object into a JSON-serializable dictionary.
@@ -59,4 +61,5 @@ class ScanResult:
             "vulnerabilities": self.vulnerabilities,
             "errors": self.errors,
             "metadata": self.metadata,
+            "subdomains": self.subdomains,
         }

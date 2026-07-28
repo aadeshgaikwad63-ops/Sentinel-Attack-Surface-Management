@@ -18,7 +18,7 @@ Extracts:
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 import whois
@@ -48,10 +48,21 @@ class WhoisLookupService:
         """
         Calculate the domain age in years.
         """
+
         if created_date is None:
             return None
 
-        return (datetime.utcnow() - created_date).days // 365
+        # Handle cases where WHOIS returns a list
+        if isinstance(created_date, list):
+            created_date = created_date[0]
+
+        # Make the datetime timezone-aware if it isn't already
+        if created_date.tzinfo is None:
+            created_date = created_date.replace(tzinfo=timezone.utc)
+
+        now = datetime.now(timezone.utc)
+
+        return (now - created_date).days // 365
 
     def lookup(self, target: str) -> dict[str, Any]:
         """

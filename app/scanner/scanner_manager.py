@@ -9,12 +9,15 @@ a single ScanResult object.
 from __future__ import annotations
 from unittest import result
 
+from requests.packages import target
+
 from app.scanner.models.scan_result import ScanResult
 from app.scanner.services.dns_lookup import DNSLookupService
 from app.scanner.services.nmap_engine import NmapEngine
 from app.scanner.services.port_scanner import PortScannerService
 from app.scanner.services.reverse_dns import ReverseDNSService
 from app.scanner.services.ssl_analyzer import SSLAnalyzerService
+from app.scanner.services.subdomain_enumerator import SubdomainEnumeratorService
 from app.scanner.services.technology_detector import (
     TechnologyDetectorService,
 )
@@ -41,6 +44,7 @@ class ScannerManager:
         self.port_scanner = PortScannerService()
         self.tech = TechnologyDetectorService()
         self.nmap = NmapEngine()
+        self.subdomains = SubdomainEnumeratorService()
 
     def scan(self, target: str) -> ScanResult:
         """
@@ -68,6 +72,15 @@ class ScannerManager:
                 result.dns = self.dns.lookup(target)
             except Exception as exc:
                 result.errors.append(f"DNS Lookup: {exc}")
+                
+        # -----------------------------------------------------
+        # Subdomain Enumeration
+        # -----------------------------------------------------
+        if is_valid_domain(target):
+            try:
+                result.subdomains = self.subdomains.enumerate(target)
+            except Exception as exc:
+                result.errors.append(f"Subdomain Enumeration: {exc}")
 
         # -----------------------------------------------------
         # Reverse DNS
