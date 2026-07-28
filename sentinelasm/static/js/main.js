@@ -57,4 +57,73 @@ document.addEventListener('DOMContentLoaded', () => {
   // Safe localStorage wrappers (works even if storage disabled)
   function localStorage_safe_set(k, v){ try { window.localStorage.setItem(k, v); } catch(e) {} }
   function localStorage_safe_get(k){ try { return window.localStorage.getItem(k); } catch(e) { return null; } }
+    // Scanner API Integration
+
+  const scanButton = document.getElementById("scanButton");
+
+  if (scanButton) {
+
+    scanButton.addEventListener("click", async () => {
+
+      const domain = document.getElementById("domain").value;
+
+      if (!domain) {
+        alert("Enter domain");
+        return;
+      }
+
+      try {
+
+        const response = await fetch(
+          "/api/scanner/scan",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              target: domain
+            })
+          }
+        );
+
+
+        const data = await response.json();
+
+        console.log("Scanner Result:", data);
+
+
+        // AI Analysis
+        if(data.ai_analysis){
+
+          console.log(
+            "Risk:",
+            data.ai_analysis.risk_score
+          );
+
+          console.log(
+            "Security:",
+            data.ai_analysis.security_score
+          );
+
+          console.log(
+            "Recommendations:",
+            data.ai_analysis.recommendations
+          );
+
+        }
+
+
+      } catch(error){
+
+        console.error(
+          "Scan Error:",
+          error
+        );
+
+      }
+
+    });
+
+  }
 });

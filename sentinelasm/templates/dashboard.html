@@ -9,7 +9,7 @@
     <p class="section-sub mb-0">Live posture across <span class="mono" style="color:var(--text-primary)">48</span> monitored assets · updated 4 minutes ago</p>
   </div>
   <div class="d-flex gap-2">
-    <a href="{{ url_for('new_scan') }}" class="btn btn-sentinel"><i class="fa-solid fa-magnifying-glass-chart me-2"></i>Run New Scan</a>
+    <a href="#" id="runScanBtn" class="btn btn-sentinel"><i class="fa-solid fa-magnifying-glass-chart me-2"></i>Run New Scan</a>
     <a href="{{ url_for('reports') }}" class="btn btn-ghost"><i class="fa-solid fa-file-arrow-down me-2"></i>Export Report</a>
   </div>
 </div>
@@ -24,7 +24,9 @@
             <circle class="track" cx="66" cy="66" r="56"></circle>
             <circle class="progress" cx="66" cy="66" r="56" stroke-dasharray="352" stroke-dashoffset="63"></circle>
           </svg>
-          <div class="core"><span class="val" style="font-size:19px;">82</span></div>
+          <div class="core">
+    <span id="securityScore" class="val" style="font-size:19px;">0</span>
+</div>
         </div>
         <div>
           <div class="stat-label">Security Score</div>
@@ -39,7 +41,7 @@
     <div class="card-glass card-pad stat-card h-100 reveal" style="animation-delay:80ms">
       <div class="glow" style="background:var(--red-glow);"></div>
       <div class="stat-label"><i class="fa-solid fa-triangle-exclamation me-1" style="color:var(--red)"></i>Risk Score</div>
-      <div class="stat-value" style="color:var(--red)">64</div>
+      <div id="riskScore" class="stat-value" style="color:var(--red)">0</div>
       <div class="stat-delta down mt-1"><i class="fa-solid fa-arrow-up"></i> +6 vs last scan</div>
       <div class="small text-muted-2 mt-2">7 unresolved critical findings</div>
     </div>
@@ -59,7 +61,7 @@
     <div class="card-glass card-pad stat-card h-100 reveal" style="animation-delay:160ms">
       <div class="glow" style="background:var(--amber-glow);"></div>
       <div class="stat-label"><i class="fa-solid fa-bug me-1" style="color:var(--amber)"></i>Critical Vulnerabilities</div>
-      <div class="stat-value" style="color:var(--amber)">7</div>
+      <div id="criticalVulns" class="stat-value" style="color:var(--amber)">0</div>
       <div class="stat-delta down mt-1"><i class="fa-solid fa-arrow-down"></i> 2 resolved this week</div>
       <div class="small text-muted-2 mt-2">CVE-2024-3094 highest severity</div>
     </div>
@@ -268,4 +270,97 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
+document.addEventListener("DOMContentLoaded",()=>{
+
+const scanBtn = document.getElementById("runScanBtn");
+
+
+if(scanBtn){
+
+scanBtn.addEventListener("click",()=>{
+
+
+let domain = prompt("Enter Domain:");
+
+if(!domain)
+return;
+
+
+fetch("/api/scanner/scan",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+target:domain
+
+})
+
+})
+
+
+.then(res=>res.json())
+
+.then(data=>{
+
+
+console.log(data);
+
+
+// security score
+
+if(data.data.security_score){
+
+document.getElementById("securityScore").innerText =
+data.data.security_score;
+
+}
+
+
+// risk score
+
+if(data.data.risk_score){
+
+document.getElementById("riskScore").innerText =
+data.data.risk_score;
+
+}
+
+
+// vulnerabilities
+
+if(data.data.vulnerabilities){
+
+document.getElementById("criticalVulns").innerText =
+data.data.vulnerabilities.length;
+
+}
+
+
+alert("Scan Completed");
+
+
+})
+
+
+.catch(err=>{
+
+console.log(err);
+
+alert("Scan Failed");
+
+});
+
+
+});
+
+
+}
+
+
+});
 {% endblock %}
