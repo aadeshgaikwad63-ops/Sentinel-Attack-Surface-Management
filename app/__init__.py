@@ -15,7 +15,7 @@ do not modify the blueprints already registered here.
 import os
 
 from flask import Flask
-#from flask_cors import CORS
+from flask_cors import CORS
 
 from app.extensions import csrf, db, limiter, login_manager, migrate
 from app.utils.logging import configure_logging
