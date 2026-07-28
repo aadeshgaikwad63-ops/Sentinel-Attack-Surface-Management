@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create Account · SentinelASM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+</head>
+<body>
+  <div class="auth-shell">
+    <div class="auth-wrap card-glass reveal">
+
+      <div class="auth-side">
+        <div class="d-flex align-items-center gap-2 mb-5">
+          <div class="brand-mark"><i class="fa-solid fa-satellite-dish"></i></div>
+          <div>
+            <div class="b1 font-display fw-bold text-white">Sentinel<span style="color:var(--green)">ASM</span></div>
+            <div class="b2" style="font-size:11px; color:var(--text-secondary); letter-spacing:.12em;">ATTACK SURFACE MANAGEMENT</div>
+          </div>
+        </div>
+
+        <div class="radar mx-auto my-5">
+          <div class="blip" style="top:38%; left:52%;"></div>
+          <div class="blip" style="top:64%; left:30%; animation-delay:.6s;"></div>
+        </div>
+
+        <h5 class="text-white fw-bold">Set up your workspace in minutes.</h5>
+        <p class="section-sub">Invite your team, connect your domains, and get your first exposure report today.</p>
+      </div>
+
+      <div class="auth-form-col">
+        <h3 class="font-display fw-bold text-white mb-1">Create your account</h3>
+        <p class="section-sub mb-4">Start monitoring your attack surface for free.</p>
+
+        <form method="POST" action="{{ url_for('register') }}" novalidate>
+          <div class="row g-3 mb-3">
+            <div class="col-6">
+              <label class="form-label-dark d-block">First name</label>
+              <input type="text" name="first_name" class="form-control form-control-dark" placeholder="Anshul" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label-dark d-block">Last name</label>
+              <input type="text" name="last_name" class="form-control form-control-dark" placeholder="Sharma" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label-dark d-block">Work email</label>
+            <input type="email" name="email" class="form-control form-control-dark" placeholder="you@company.com" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label-dark d-block">Organization</label>
+            <input type="text" name="organization" class="form-control form-control-dark" placeholder="Acme Corporation" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label-dark d-block">Password</label>
+            <input type="password" name="password" class="form-control form-control-dark" placeholder="Minimum 8 characters" required minlength="8">
+            <div class="progress mt-2" style="height:4px; background:var(--bg-elevated); border-radius:4px;">
+              <div class="progress-bar" style="width:60%; background:var(--amber); border-radius:4px;"></div>
+            </div>
+            <div class="small mt-1" style="color:var(--text-muted);">Medium strength — add a symbol to strengthen.</div>
+          </div>
+
+          <div class="form-check mb-4">
+            <input class="form-check-input" type="checkbox" id="terms" required style="background:var(--bg-elevated); border-color:var(--border-strong);">
+            <label class="form-check-label small" for="terms" style="color:var(--text-secondary);">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
+          </div>
+
+          <button type="submit" class="btn btn-sentinel w-100 py-2 mb-3">
+            <i class="fa-solid fa-user-plus me-2"></i>Create Account
+          </button>
+
+          <div class="text-center small" style="color:var(--text-secondary);">
+            Already have an account? <a href="{{ url_for('login') }}" class="fw-semibold">Sign in</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

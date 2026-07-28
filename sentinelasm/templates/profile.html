@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% set active_page = 'profile' %}
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="mb-4 reveal">
+  <h3 class="font-display fw-bold text-white mb-1">Profile</h3>
+  <p class="section-sub mb-0">Manage your account, credentials, and API access.</p>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="card-glass card-pad text-center reveal">
+      <img src="https://i.pravatar.cc/120?img=13" class="rounded-4 mb-3" width="88" height="88" alt="Aadesh Rane">
+      <h5 class="text-white fw-bold mb-0">Aadesh Rane</h5>
+      <div class="small text-muted-2 mb-2">aadesh@acme.com</div>
+      <span class="badge-soft badge-admin">Administrator</span>
+      <hr style="border-color:var(--border);">
+      <div class="d-flex justify-content-between small mb-2"><span class="text-secondary">Member since</span><span class="mono">Mar 2023</span></div>
+      <div class="d-flex justify-content-between small mb-2"><span class="text-secondary">Assets owned</span><span class="mono">48</span></div>
+      <div class="d-flex justify-content-between small"><span class="text-secondary">2FA</span><span class="badge-soft badge-active">Enabled</span></div>
+      <button class="btn btn-ghost w-100 mt-3"><i class="fa-solid fa-camera me-2"></i>Change Photo</button>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card-glass card-pad mb-3 reveal">
+      <div class="section-title mb-3">User Information</div>
+      <div class="row g-3">
+        <div class="col-md-6"><label class="form-label-dark d-block">First name</label><input type="text" class="form-control form-control-dark" value="Aadesh"></div>
+        <div class="col-md-6"><label class="form-label-dark d-block">Last name</label><input type="text" class="form-control form-control-dark" value="Rane"></div>
+        <div class="col-md-6"><label class="form-label-dark d-block">Email</label><input type="email" class="form-control form-control-dark" value="aadesh@acme.com"></div>
+        <div class="col-md-6"><label class="form-label-dark d-block">Organization</label><input type="text" class="form-control form-control-dark" value="Acme Corporation"></div>
+      </div>
+      <button class="btn btn-sentinel mt-3"><i class="fa-solid fa-floppy-disk me-2"></i>Save Changes</button>
+    </div>
+
+    <div class="card-glass card-pad mb-3 reveal">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="section-title">API Tokens</div>
+        <button class="btn btn-ghost btn-sm"><i class="fa-solid fa-plus me-2"></i>Generate Token</button>
+      </div>
+      <div class="d-flex justify-content-between align-items-center p-3 mb-2" style="background:var(--bg-elevated); border-radius:10px; border:1px solid var(--border);">
+        <div>
+          <div class="fw-semibold small text-white">CI/CD Pipeline Key</div>
+          <div class="mono small text-muted-2">sk_live_••••••••••••8f2a</div>
+        </div>
+        <button class="btn btn-outline-danger-soft btn-sm">Revoke</button>
+      </div>
+      <div class="d-flex justify-content-between align-items-center p-3" style="background:var(--bg-elevated); border-radius:10px; border:1px solid var(--border);">
+        <div>
+          <div class="fw-semibold small text-white">Read-only Reporting Key</div>
+          <div class="mono small text-muted-2">sk_live_••••••••••••c710</div>
+        </div>
+        <button class="btn btn-outline-danger-soft btn-sm">Revoke</button>
+      </div>
+    </div>
+
+    <div class="card-glass card-pad mb-3 reveal">
+      <div class="section-title mb-3">Change Password</div>
+      <div class="row g-3">
+        <div class="col-md-4"><label class="form-label-dark d-block">Current password</label><input type="password" class="form-control form-control-dark"></div>
+        <div class="col-md-4"><label class="form-label-dark d-block">New password</label><input type="password" class="form-control form-control-dark"></div>
+        <div class="col-md-4"><label class="form-label-dark d-block">Confirm password</label><input type="password" class="form-control form-control-dark"></div>
+      </div>
+      <button class="btn btn-sentinel mt-3"><i class="fa-solid fa-key me-2"></i>Update Password</button>
+    </div>
+
+    <div class="card-glass card-pad reveal">
+      <div class="section-title mb-3">Activity Log</div>
+      <div class="d-flex flex-column gap-3">
+        <div class="d-flex gap-3">
+          <div class="msg-avatar" style="background:var(--green-glow); color:var(--green);"><i class="fa-solid fa-right-to-bracket"></i></div>
+          <div><div class="small fw-semibold text-white">Signed in from new device</div><div class="small text-muted-2">Chrome on macOS · Mumbai, IN · 2h ago</div></div>
+        </div>
+        <div class="d-flex gap-3">
+          <div class="msg-avatar" style="background:var(--blue-glow); color:var(--blue);"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+          <div><div class="small fw-semibold text-white">Initiated scan on acme.com</div><div class="small text-muted-2">Full scan · 2h ago</div></div>
+        </div>
+        <div class="d-flex gap-3">
+          <div class="msg-avatar" style="background:var(--purple-glow); color:var(--purple);"><i class="fa-solid fa-key"></i></div>
+          <div><div class="small fw-semibold text-white">Generated new API token</div><div class="small text-muted-2">CI/CD Pipeline Key · 3d ago</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
