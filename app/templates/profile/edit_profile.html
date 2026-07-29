@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Edit Profile - SentinelASM{% endblock %}
+{% block content %}
+    <h1>Edit Profile</h1>
+    <div class="subtitle">Update your account details</div>
+    <form method="POST" novalidate>
+        {{ form.hidden_tag() }}
+
+        <label for="{{ form.full_name.id }}">Full Name</label>
+        {{ form.full_name() }}
+
+        <label for="{{ form.email.id }}">Email</label>
+        {{ form.email() }}
+        {% if form.email.errors %}
+            <div class="field-errors">{{ form.email.errors[0] }}</div>
+        {% endif %}
+
+        <label for="{{ form.bio.id }}">Bio</label>
+        {{ form.bio(rows=4) }}
+
+        {{ form.submit() }}
+    </form>
+    <div class="links">
+        <a href="{{ url_for('profile.view_profile') }}">Back to profile</a>
+    </div>
+{% endblock %}
