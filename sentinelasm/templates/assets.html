@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% set active_page = 'assets' %}
+{% block title %}Asset Management{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4 reveal">
+  <div>
+    <h3 class="font-display fw-bold text-white mb-1">Asset Management</h3>
+    <p class="section-sub mb-0">Every domain, subdomain, and host SentinelASM is monitoring.</p>
+  </div>
+  <button class="btn btn-sentinel" data-bs-toggle="modal" data-bs-target="#addAssetModal">
+    <i class="fa-solid fa-plus me-2"></i>Add Asset
+  </button>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-3 col-6"><div class="card-glass card-pad reveal"><div class="stat-label">Domains</div><div class="stat-value">32</div></div></div>
+  <div class="col-md-3 col-6"><div class="card-glass card-pad reveal" style="animation-delay:40ms"><div class="stat-label">Subdomains</div><div class="stat-value">16</div></div></div>
+  <div class="col-md-3 col-6"><div class="card-glass card-pad reveal" style="animation-delay:80ms"><div class="stat-label">IP Addresses</div><div class="stat-value">54</div></div></div>
+  <div class="col-md-3 col-6"><div class="card-glass card-pad reveal" style="animation-delay:120ms"><div class="stat-label" style="color:var(--red)">At Risk</div><div class="stat-value" style="color:var(--red)">9</div></div></div>
+</div>
+
+<div class="card-glass reveal">
+  <div class="card-pad pb-2 d-flex flex-wrap gap-2 justify-content-between align-items-center">
+    <div class="d-flex gap-2 flex-wrap">
+      <div class="search-shell" style="width:260px;">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" placeholder="Search assets…">
+      </div>
+      <select class="form-select form-select-dark" style="width:auto;">
+        <option>All types</option><option>Domain</option><option>Subdomain</option><option>IP</option>
+      </select>
+      <select class="form-select form-select-dark" style="width:auto;">
+        <option>All risk levels</option><option>Critical</option><option>High</option><option>Medium</option><option>Low</option>
+      </select>
+    </div>
+    <button class="btn btn-ghost btn-sm"><i class="fa-solid fa-arrows-rotate me-2"></i>Refresh</button>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-sentinel align-middle">
+      <thead>
+        <tr>
+          <th><input class="form-check-input" type="checkbox"></th>
+          <th>Asset</th><th>Type</th><th>IP Address</th><th>Technology</th><th>Open Ports</th><th>Risk</th><th>Last Scanned</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% set assets = [
+          ('acme.com','Domain','203.0.113.10','Nginx / PHP 8.2','80, 443','Critical','2h ago'),
+          ('api.acme.com','Subdomain','203.0.113.4','Node.js / Express','443, 8080','High','6h ago'),
+          ('staging.acme.com','Subdomain','203.0.113.21','Apache / WordPress','80, 443','Low','1d ago'),
+          ('vpn.acme.com','Subdomain','203.0.113.33','OpenVPN','1194','Medium','running'),
+          ('cdn.acme.com','Subdomain','198.51.100.5','Cloudflare','443','Low','2d ago'),
+          ('mail.acme.com','Subdomain','198.51.100.9','Postfix','25, 465, 587','Medium','3d ago'),
+        ] %}
+        {% for name, type, ip, tech, ports, risk, scanned in assets %}
+        <tr>
+          <td><input class="form-check-input" type="checkbox"></td>
+          <td><a href="{{ url_for('scan_results') }}" class="mono fw-semibold text-white">{{ name }}</a></td>
+          <td><span class="text-secondary">{{ type }}</span></td>
+          <td class="mono text-secondary">{{ ip }}</td>
+          <td>{{ tech }}</td>
+          <td class="mono">{{ ports }}</td>
+          <td><span class="badge-soft badge-{{ risk|lower }}">{{ risk }}</span></td>
+          <td class="text-secondary">{{ scanned }}</td>
+          <td class="text-end">
+            <div class="dropdown">
+              <button class="icon-btn" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+              <ul class="dropdown-menu dropdown-menu-end p-2" style="background:var(--card); border:1px solid var(--border-strong); border-radius:10px;">
+                <li><a class="dropdown-item small py-2" href="{{ url_for('scan_results') }}" style="color:var(--text-primary); border-radius:8px;"><i class="fa-solid fa-eye me-2"></i>View Results</a></li>
+                <li><a class="dropdown-item small py-2" href="{{ url_for('new_scan') }}" style="color:var(--text-primary); border-radius:8px;"><i class="fa-solid fa-rotate me-2"></i>Rescan</a></li>
+                <li><a class="dropdown-item small py-2 text-danger" href="#" style="border-radius:8px;"><i class="fa-solid fa-trash me-2"></i>Remove</a></li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="card-pad pt-2 d-flex justify-content-between align-items-center">
+    <span class="small text-muted-2">Showing 6 of 48 assets</span>
+    <nav><ul class="pagination pagination-sm mb-0">
+      <li class="page-item disabled"><a class="page-link" style="background:var(--card); border-color:var(--border-strong); color:var(--text-muted);">Prev</a></li>
+      <li class="page-item active"><a class="page-link" style="background:var(--green); border-color:var(--green); color:#052A20;">1</a></li>
+      <li class="page-item"><a class="page-link" style="background:var(--card); border-color:var(--border-strong); color:var(--text-primary);">2</a></li>
+      <li class="page-item"><a class="page-link" style="background:var(--card); border-color:var(--border-strong); color:var(--text-primary);">Next</a></li>
+    </ul></nav>
+  </div>
+</div>
+
+<!-- Add Asset Modal -->
+<div class="modal fade" id="addAssetModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background:var(--card); border:1px solid var(--border-strong); border-radius:16px;">
+      <div class="modal-header" style="border-color:var(--border);">
+        <h5 class="modal-title font-display fw-bold text-white">Add New Asset</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="{{ url_for('assets') }}">
+        <div class="modal-body">
+          <label class="form-label-dark d-block">Domain or IP address</label>
+          <input type="text" name="target" class="form-control form-control-dark mb-3" placeholder="e.g. shop.acme.com">
+          <label class="form-label-dark d-block">Asset type</label>
+          <select class="form-select form-select-dark">
+            <option>Domain</option><option>Subdomain</option><option>IP Address</option>
+          </select>
+        </div>
+        <div class="modal-footer" style="border-color:var(--border);">
+          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-sentinel">Add Asset</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

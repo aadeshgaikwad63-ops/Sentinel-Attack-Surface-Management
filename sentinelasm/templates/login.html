@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign In · SentinelASM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+</head>
+<body>
+  <div class="auth-shell">
+    <div class="auth-wrap card-glass reveal">
+
+      <div class="auth-side">
+        <div class="d-flex align-items-center gap-2 mb-5">
+          <div class="brand-mark"><i class="fa-solid fa-satellite-dish"></i></div>
+          <div>
+            <div class="b1 font-display fw-bold text-white">Sentinel<span style="color:var(--green)">ASM</span></div>
+            <div class="b2" style="font-size:11px; color:var(--text-secondary); letter-spacing:.12em;">ATTACK SURFACE MANAGEMENT</div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-center my-5">
+          <div class="sweep-ring">
+            <svg width="132" height="132" viewBox="0 0 132 132">
+              <circle class="track" cx="66" cy="66" r="56"></circle>
+              <circle class="progress" cx="66" cy="66" r="56" stroke-dasharray="352" stroke-dashoffset="65"></circle>
+            </svg>
+            <div class="core"><span class="val">82</span><span class="lbl">Secure</span></div>
+          </div>
+        </div>
+
+        <h5 class="text-white fw-bold">Know your exposure before attackers do.</h5>
+        <p class="section-sub">Continuous discovery, risk scoring, and CVE mapping across every domain, port, and certificate you own.</p>
+
+        <ul class="list-unstyled mt-4 mb-0" style="font-size:13px;">
+          <li class="mb-2"><i class="fa-solid fa-circle-check me-2" style="color:var(--green)"></i>Real-time subdomain &amp; port discovery</li>
+          <li class="mb-2"><i class="fa-solid fa-circle-check me-2" style="color:var(--green)"></i>AI-assisted risk triage</li>
+          <li><i class="fa-solid fa-circle-check me-2" style="color:var(--green)"></i>Enterprise-grade PDF reporting</li>
+        </ul>
+      </div>
+
+      <div class="auth-form-col">
+        <h3 class="font-display fw-bold text-white mb-1">Welcome back</h3>
+        <p class="section-sub mb-4">Sign in to your SentinelASM workspace.</p>
+
+        <form method="POST" action="{{ url_for('login') }}" novalidate>
+          <div class="mb-3">
+            <label class="form-label-dark d-block">Email address</label>
+            <input type="email" name="email" class="form-control form-control-dark" placeholder="you@company.com" required autofocus>
+          </div>
+          <div class="mb-2">
+            <label class="form-label-dark d-block">Password</label>
+            <div class="position-relative">
+              <input type="password" name="password" id="loginPassword" class="form-control form-control-dark" placeholder="••••••••" required>
+              <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y me-1 p-1" style="color:var(--text-muted); background:none; border:none;" onclick="const i=document.getElementById('loginPassword'); i.type = i.type==='password'?'text':'password';">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="remember" style="background:var(--bg-elevated); border-color:var(--border-strong);">
+              <label class="form-check-label small" for="remember" style="color:var(--text-secondary);">Remember me</label>
+            </div>
+            <a href="#" class="small">Forgot password?</a>
+          </div>
+
+          <button type="submit" class="btn btn-sentinel w-100 py-2 mb-3">
+            <i class="fa-solid fa-right-to-bracket me-2"></i>Sign In
+          </button>
+
+          <div class="text-center small" style="color:var(--text-secondary);">
+            Don't have an account? <a href="{{ url_for('register') }}" class="fw-semibold">Create one</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

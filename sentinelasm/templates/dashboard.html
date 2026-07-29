@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+{% set active_page = 'dashboard' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4 reveal">
+  <div>
+    <h3 class="font-display fw-bold text-white mb-1">Security Overview</h3>
+    <p class="section-sub mb-0">Live posture across <span class="mono" style="color:var(--text-primary)">48</span> monitored assets · updated 4 minutes ago</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('new_scan') }}" class="btn btn-sentinel"><i class="fa-solid fa-magnifying-glass-chart me-2"></i>Run New Scan</a>
+    <a href="{{ url_for('reports') }}" class="btn btn-ghost"><i class="fa-solid fa-file-arrow-down me-2"></i>Export Report</a>
+  </div>
+</div>
+
+<!-- Score / stat cards -->
+<div class="row g-3 mb-3">
+  <div class="col-xl-3 col-md-6">
+    <div class="card-glass card-pad h-100 reveal" style="animation-delay:40ms">
+      <div class="d-flex align-items-center gap-3">
+        <div class="sweep-ring" style="width:84px; height:84px;">
+          <svg width="84" height="84" viewBox="0 0 132 132">
+            <circle class="track" cx="66" cy="66" r="56"></circle>
+            <circle class="progress" cx="66" cy="66" r="56" stroke-dasharray="352" stroke-dashoffset="63"></circle>
+          </svg>
+          <div class="core"><span class="val" style="font-size:19px;">82</span></div>
+        </div>
+        <div>
+          <div class="stat-label">Security Score</div>
+          <div class="stat-delta up"><i class="fa-solid fa-arrow-up"></i> 4 pts this week</div>
+          <div class="small text-muted-2 mt-1">Grade: B+</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-md-6">
+    <div class="card-glass card-pad stat-card h-100 reveal" style="animation-delay:80ms">
+      <div class="glow" style="background:var(--red-glow);"></div>
+      <div class="stat-label"><i class="fa-solid fa-triangle-exclamation me-1" style="color:var(--red)"></i>Risk Score</div>
+      <div class="stat-value" style="color:var(--red)">64</div>
+      <div class="stat-delta down mt-1"><i class="fa-solid fa-arrow-up"></i> +6 vs last scan</div>
+      <div class="small text-muted-2 mt-2">7 unresolved critical findings</div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-md-6">
+    <div class="card-glass card-pad stat-card h-100 reveal" style="animation-delay:120ms">
+      <div class="glow" style="background:var(--blue-glow);"></div>
+      <div class="stat-label"><i class="fa-solid fa-server me-1" style="color:var(--blue)"></i>Total Assets</div>
+      <div class="stat-value">48</div>
+      <div class="stat-delta up mt-1"><i class="fa-solid fa-arrow-up"></i> 3 new this month</div>
+      <div class="small text-muted-2 mt-2">32 domains · 16 subdomains</div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-md-6">
+    <div class="card-glass card-pad stat-card h-100 reveal" style="animation-delay:160ms">
+      <div class="glow" style="background:var(--amber-glow);"></div>
+      <div class="stat-label"><i class="fa-solid fa-bug me-1" style="color:var(--amber)"></i>Critical Vulnerabilities</div>
+      <div class="stat-value" style="color:var(--amber)">7</div>
+      <div class="stat-delta down mt-1"><i class="fa-solid fa-arrow-down"></i> 2 resolved this week</div>
+      <div class="small text-muted-2 mt-2">CVE-2024-3094 highest severity</div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts row -->
+<div class="row g-3 mb-3">
+  <div class="col-xl-5">
+    <div class="card-glass card-pad h-100 reveal">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          <div class="section-title">Risk Trend</div>
+          <div class="section-sub">Last 14 days</div>
+        </div>
+        <select class="form-select form-select-dark form-select-sm" style="width:auto;">
+          <option>14 days</option><option>30 days</option><option>90 days</option>
+        </select>
+      </div>
+      <canvas id="riskTrendChart" height="190"></canvas>
+    </div>
+  </div>
+
+  <div class="col-xl-4">
+    <div class="card-glass card-pad h-100 reveal">
+      <div class="section-title mb-2">Severity Breakdown</div>
+      <canvas id="severityPieChart" height="190"></canvas>
+    </div>
+  </div>
+
+  <div class="col-xl-3">
+    <div class="card-glass card-pad h-100 reveal">
+      <div class="section-title mb-2">Open Ports</div>
+      <canvas id="openPortsChart" height="190"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Table + alerts row -->
+<div class="row g-3">
+  <div class="col-xl-8">
+    <div class="card-glass reveal">
+      <div class="card-pad pb-2 d-flex justify-content-between align-items-center">
+        <div class="section-title">Recent Scans</div>
+        <a href="{{ url_for('scan_results') }}" class="small">View all →</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-sentinel mb-0">
+          <thead>
+            <tr><th>Target</th><th>Type</th><th>Findings</th><th>Risk</th><th>Status</th><th>Scanned</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="mono">acme.com</td>
+              <td>Full Scan</td>
+              <td><span class="badge-soft badge-critical">3 critical</span></td>
+              <td class="mono fw-bold" style="color:var(--red)">78</td>
+              <td><span class="badge-soft badge-active">Complete</span></td>
+              <td class="text-secondary">2h ago</td>
+            </tr>
+            <tr>
+              <td class="mono">api.acme.com</td>
+              <td>Port Scan</td>
+              <td><span class="badge-soft badge-high">2 high</span></td>
+              <td class="mono fw-bold" style="color:var(--amber)">52</td>
+              <td><span class="badge-soft badge-active">Complete</span></td>
+              <td class="text-secondary">6h ago</td>
+            </tr>
+            <tr>
+              <td class="mono">staging.acme.com</td>
+              <td>SSL Audit</td>
+              <td><span class="badge-soft badge-low">Clean</span></td>
+              <td class="mono fw-bold" style="color:var(--green)">18</td>
+              <td><span class="badge-soft badge-active">Complete</span></td>
+              <td class="text-secondary">1d ago</td>
+            </tr>
+            <tr>
+              <td class="mono">vpn.acme.com</td>
+              <td>Full Scan</td>
+              <td><span class="badge-soft badge-medium">1 medium</span></td>
+              <td class="mono fw-bold" style="color:var(--blue)">34</td>
+              <td><span class="badge-soft badge-suspended"><i class="fa-solid fa-spinner fa-spin me-1"></i>Scanning</span></td>
+              <td class="text-secondary">running</td>
+            </tr>
+            <tr>
+              <td class="mono">cdn.acme.com</td>
+              <td>Tech Detection</td>
+              <td><span class="badge-soft badge-low">Clean</span></td>
+              <td class="mono fw-bold" style="color:var(--green)">12</td>
+              <td><span class="badge-soft badge-active">Complete</span></td>
+              <td class="text-secondary">2d ago</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-4">
+    <div class="card-glass card-pad h-100 reveal">
+      <div class="section-title mb-3">Latest Alerts</div>
+      <div class="d-flex flex-column gap-3">
+        <div class="d-flex gap-3">
+          <div class="msg-avatar" style="background:var(--red-glow); color:var(--red);"><i class="fa-solid fa-bug"></i></div>
+          <div>
+            <div class="small fw-semibold text-white">Critical CVE-2024-3094 found</div>
+            <div class="small text-muted-2">xz-utils backdoor · api.acme.com</div>
+            <div class="small text-muted-2" style="font-size:11px;">12 minutes ago</div>
+          </div>
+        </div>
+        <div class="d-flex gap-3">
+          <div class="msg-avatar" style="background:var(--amber-glow); color:var(--amber);"><i class="fa-solid fa-lock-open"></i></div>
+          <div>
+            <div class="small fw-semibold text-white">Unexpected open port</div>
+            <div class="small text-muted-2">Port 8080 exposed · 203.0.113.4</div>
+            <div class="small text-muted-2" style="font-size:11px;">1 hour ago</div>
+          </div>
+        </div>
+        <div class="d-flex gap-3">
+          <div class="msg-avatar" style="background:var(--blue-glow); color:var(--blue);"><i class="fa-solid fa-certificate"></i></div>
+          <div>
+            <div class="small fw-semibold text-white">SSL certificate expiring</div>
+            <div class="small text-muted-2">vpn.acme.com · expires in 9 days</div>
+            <div class="small text-muted-2" style="font-size:11px;">3 hours ago</div>
+          </div>
+        </div>
+        <div class="d-flex gap-3">
+          <div class="msg-avatar" style="background:var(--green-glow); color:var(--green);"><i class="fa-solid fa-check"></i></div>
+          <div>
+            <div class="small fw-semibold text-white">Vulnerability remediated</div>
+            <div class="small text-muted-2">CVE-2023-4911 patched · staging.acme.com</div>
+            <div class="small text-muted-2" style="font-size:11px;">Yesterday</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const trendCtx = document.getElementById('riskTrendChart');
+  new Chart(trendCtx, {
+    type: 'line',
+    data: {
+      labels: ['Jul 14','Jul 16','Jul 18','Jul 20','Jul 22','Jul 24','Jul 26','Jul 28'],
+      datasets: [
+        {
+          label: 'Risk Score',
+          data: [48, 51, 58, 55, 62, 59, 66, 64],
+          borderColor: SENTINEL_PALETTE.red,
+          backgroundColor: sentinelGradient(trendCtx.getContext('2d'), SENTINEL_PALETTE.red),
+          fill: true, tension: .4, pointRadius: 0, borderWidth: 2.5
+        },
+        {
+          label: 'Security Score',
+          data: [70, 71, 73, 75, 76, 78, 80, 82],
+          borderColor: SENTINEL_PALETTE.green,
+          backgroundColor: sentinelGradient(trendCtx.getContext('2d'), SENTINEL_PALETTE.green),
+          fill: true, tension: .4, pointRadius: 0, borderWidth: 2.5
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      scales: {
+        x: { grid: { color: SENTINEL_PALETTE.grid } },
+        y: { grid: { color: SENTINEL_PALETTE.grid }, min: 0, max: 100 }
+      },
+      plugins: { legend: { position: 'bottom' } }
+    }
+  });
+
+  new Chart(document.getElementById('severityPieChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Critical', 'High', 'Medium', 'Low'],
+      datasets: [{
+        data: [7, 14, 22, 41],
+        backgroundColor: [SENTINEL_PALETTE.red, SENTINEL_PALETTE.amber, SENTINEL_PALETTE.blue, SENTINEL_PALETTE.green],
+        borderWidth: 0, hoverOffset: 6
+      }]
+    },
+    options: { responsive: true, cutout: '68%', plugins: { legend: { position: 'bottom' } } }
+  });
+
+  new Chart(document.getElementById('openPortsChart'), {
+    type: 'bar',
+    data: {
+      labels: ['22','80','443','3306','8080','8443'],
+      datasets: [{
+        data: [12, 40, 44, 6, 9, 5],
+        backgroundColor: SENTINEL_PALETTE.blue,
+        borderRadius: 6, maxBarThickness: 22
+      }]
+    },
+    options: {
+      responsive: true, indexAxis: 'y',
+      scales: { x: { grid: { color: SENTINEL_PALETTE.grid } }, y: { grid: { display: false } } },
+      plugins: { legend: { display: false } }
+    }
+  });
+});
+</script>
+{% endblock %}
