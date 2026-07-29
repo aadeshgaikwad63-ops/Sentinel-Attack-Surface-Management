@@ -89,6 +89,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         const data = await response.json();
+        // ------------------------------
+// Member 3 (AI) -> Member 4 (UI)
+// ------------------------------
+
+if (data.ai_analysis) {
+
+    document.getElementById("riskScore").innerText =
+        data.ai_analysis.risk_score ?? "-";
+
+    document.getElementById("securityScore").innerText =
+        data.ai_analysis.security_score ?? "-";
+
+    document.getElementById("threatLevel").innerText =
+        data.ai_analysis.threat.threat_level ?? "-";
+
+    document.getElementById("recommendations").innerHTML =
+        data.ai_analysis.recommendations
+            .map(r => `<li>${r.title}</li>`)
+            .join("");
+
+}
 
         console.log("Scanner Result:", data);
 
@@ -126,4 +147,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
   }
+  document.getElementById("scanBtn")?.addEventListener("click", async () => {
+
+    const target = document.getElementById("targetInput").value;
+
+    const response = await fetch("/api/scanner/scan", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            target: target
+        })
+    });
+
+    const data = await response.json();
+
+    console.log(data);
+
+    // Member 2 ka data
+    document.getElementById("scanResult").innerText =
+        JSON.stringify(data.data, null, 2);
+});
 });

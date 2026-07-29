@@ -1,367 +1,1066 @@
 {% extends "base.html" %}
+
 {% set active_page = 'dashboard' %}
-{% block title %}Dashboard{% endblock %}
 
-{% block content %}
-<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4 reveal">
-  <div>
-    <h3 class="font-display fw-bold text-white mb-1">Security Overview</h3>
-    <p class="section-sub mb-0">Live posture across <span class="mono" style="color:var(--text-primary)">48</span> monitored assets · updated 4 minutes ago</p>
-  </div>
-  <div class="d-flex gap-2">
-    <a href="#" id="runScanBtn" class="btn btn-sentinel"><i class="fa-solid fa-magnifying-glass-chart me-2"></i>Run New Scan</a>
-    <a href="{{ url_for('reports') }}" class="btn btn-ghost"><i class="fa-solid fa-file-arrow-down me-2"></i>Export Report</a>
-  </div>
-</div>
-
-<!-- Score / stat cards -->
-<div class="row g-3 mb-3">
-  <div class="col-xl-3 col-md-6">
-    <div class="card-glass card-pad h-100 reveal" style="animation-delay:40ms">
-      <div class="d-flex align-items-center gap-3">
-        <div class="sweep-ring" style="width:84px; height:84px;">
-          <svg width="84" height="84" viewBox="0 0 132 132">
-            <circle class="track" cx="66" cy="66" r="56"></circle>
-            <circle class="progress" cx="66" cy="66" r="56" stroke-dasharray="352" stroke-dashoffset="63"></circle>
-          </svg>
-          <div class="core">
-    <span id="securityScore" class="val" style="font-size:19px;">0</span>
-</div>
-        </div>
-        <div>
-          <div class="stat-label">Security Score</div>
-          <div class="stat-delta up"><i class="fa-solid fa-arrow-up"></i> 4 pts this week</div>
-          <div class="small text-muted-2 mt-1">Grade: B+</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-xl-3 col-md-6">
-    <div class="card-glass card-pad stat-card h-100 reveal" style="animation-delay:80ms">
-      <div class="glow" style="background:var(--red-glow);"></div>
-      <div class="stat-label"><i class="fa-solid fa-triangle-exclamation me-1" style="color:var(--red)"></i>Risk Score</div>
-      <div id="riskScore" class="stat-value" style="color:var(--red)">0</div>
-      <div class="stat-delta down mt-1"><i class="fa-solid fa-arrow-up"></i> +6 vs last scan</div>
-      <div class="small text-muted-2 mt-2">7 unresolved critical findings</div>
-    </div>
-  </div>
-
-  <div class="col-xl-3 col-md-6">
-    <div class="card-glass card-pad stat-card h-100 reveal" style="animation-delay:120ms">
-      <div class="glow" style="background:var(--blue-glow);"></div>
-      <div class="stat-label"><i class="fa-solid fa-server me-1" style="color:var(--blue)"></i>Total Assets</div>
-      <div class="stat-value">48</div>
-      <div class="stat-delta up mt-1"><i class="fa-solid fa-arrow-up"></i> 3 new this month</div>
-      <div class="small text-muted-2 mt-2">32 domains · 16 subdomains</div>
-    </div>
-  </div>
-
-  <div class="col-xl-3 col-md-6">
-    <div class="card-glass card-pad stat-card h-100 reveal" style="animation-delay:160ms">
-      <div class="glow" style="background:var(--amber-glow);"></div>
-      <div class="stat-label"><i class="fa-solid fa-bug me-1" style="color:var(--amber)"></i>Critical Vulnerabilities</div>
-      <div id="criticalVulns" class="stat-value" style="color:var(--amber)">0</div>
-      <div class="stat-delta down mt-1"><i class="fa-solid fa-arrow-down"></i> 2 resolved this week</div>
-      <div class="small text-muted-2 mt-2">CVE-2024-3094 highest severity</div>
-    </div>
-  </div>
-</div>
-
-<!-- Charts row -->
-<div class="row g-3 mb-3">
-  <div class="col-xl-5">
-    <div class="card-glass card-pad h-100 reveal">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <div>
-          <div class="section-title">Risk Trend</div>
-          <div class="section-sub">Last 14 days</div>
-        </div>
-        <select class="form-select form-select-dark form-select-sm" style="width:auto;">
-          <option>14 days</option><option>30 days</option><option>90 days</option>
-        </select>
-      </div>
-      <canvas id="riskTrendChart" height="190"></canvas>
-    </div>
-  </div>
-
-  <div class="col-xl-4">
-    <div class="card-glass card-pad h-100 reveal">
-      <div class="section-title mb-2">Severity Breakdown</div>
-      <canvas id="severityPieChart" height="190"></canvas>
-    </div>
-  </div>
-
-  <div class="col-xl-3">
-    <div class="card-glass card-pad h-100 reveal">
-      <div class="section-title mb-2">Open Ports</div>
-      <canvas id="openPortsChart" height="190"></canvas>
-    </div>
-  </div>
-</div>
-
-<!-- Table + alerts row -->
-<div class="row g-3">
-  <div class="col-xl-8">
-    <div class="card-glass reveal">
-      <div class="card-pad pb-2 d-flex justify-content-between align-items-center">
-        <div class="section-title">Recent Scans</div>
-        <a href="{{ url_for('scan_results') }}" class="small">View all →</a>
-        <pre id="scanResult"></pre>
-      </div>
-      <div class="table-responsive">
-        <table class="table-sentinel mb-0">
-          <thead>
-            <tr><th>Target</th><th>Type</th><th>Findings</th><th>Risk</th><th>Status</th><th>Scanned</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="mono">acme.com</td>
-              <td>Full Scan</td>
-              <td><span class="badge-soft badge-critical">3 critical</span></td>
-              <td class="mono fw-bold" style="color:var(--red)">78</td>
-              <td><span class="badge-soft badge-active">Complete</span></td>
-              <td class="text-secondary">2h ago</td>
-            </tr>
-            <tr>
-              <td class="mono">api.acme.com</td>
-              <td>Port Scan</td>
-              <td><span class="badge-soft badge-high">2 high</span></td>
-              <td class="mono fw-bold" style="color:var(--amber)">52</td>
-              <td><span class="badge-soft badge-active">Complete</span></td>
-              <td class="text-secondary">6h ago</td>
-            </tr>
-            <tr>
-              <td class="mono">staging.acme.com</td>
-              <td>SSL Audit</td>
-              <td><span class="badge-soft badge-low">Clean</span></td>
-              <td class="mono fw-bold" style="color:var(--green)">18</td>
-              <td><span class="badge-soft badge-active">Complete</span></td>
-              <td class="text-secondary">1d ago</td>
-            </tr>
-            <tr>
-              <td class="mono">vpn.acme.com</td>
-              <td>Full Scan</td>
-              <td><span class="badge-soft badge-medium">1 medium</span></td>
-              <td class="mono fw-bold" style="color:var(--blue)">34</td>
-              <td><span class="badge-soft badge-suspended"><i class="fa-solid fa-spinner fa-spin me-1"></i>Scanning</span></td>
-              <td class="text-secondary">running</td>
-            </tr>
-            <tr>
-              <td class="mono">cdn.acme.com</td>
-              <td>Tech Detection</td>
-              <td><span class="badge-soft badge-low">Clean</span></td>
-              <td class="mono fw-bold" style="color:var(--green)">12</td>
-              <td><span class="badge-soft badge-active">Complete</span></td>
-              <td class="text-secondary">2d ago</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-xl-4">
-    <div class="card-glass card-pad h-100 reveal">
-      <div class="section-title mb-3">Latest Alerts</div>
-      <div class="d-flex flex-column gap-3">
-        <div class="d-flex gap-3">
-          <div class="msg-avatar" style="background:var(--red-glow); color:var(--red);"><i class="fa-solid fa-bug"></i></div>
-          <div>
-            <div class="small fw-semibold text-white">Critical CVE-2024-3094 found</div>
-            <div class="small text-muted-2">xz-utils backdoor · api.acme.com</div>
-            <div class="small text-muted-2" style="font-size:11px;">12 minutes ago</div>
-          </div>
-        </div>
-        <div class="d-flex gap-3">
-          <div class="msg-avatar" style="background:var(--amber-glow); color:var(--amber);"><i class="fa-solid fa-lock-open"></i></div>
-          <div>
-            <div class="small fw-semibold text-white">Unexpected open port</div>
-            <div class="small text-muted-2">Port 8080 exposed · 203.0.113.4</div>
-            <div class="small text-muted-2" style="font-size:11px;">1 hour ago</div>
-          </div>
-        </div>
-        <div class="d-flex gap-3">
-          <div class="msg-avatar" style="background:var(--blue-glow); color:var(--blue);"><i class="fa-solid fa-certificate"></i></div>
-          <div>
-            <div class="small fw-semibold text-white">SSL certificate expiring</div>
-            <div class="small text-muted-2">vpn.acme.com · expires in 9 days</div>
-            <div class="small text-muted-2" style="font-size:11px;">3 hours ago</div>
-          </div>
-        </div>
-        <div class="d-flex gap-3">
-          <div class="msg-avatar" style="background:var(--green-glow); color:var(--green);"><i class="fa-solid fa-check"></i></div>
-          <div>
-            <div class="small fw-semibold text-white">Vulnerability remediated</div>
-            <div class="small text-muted-2">CVE-2023-4911 patched · staging.acme.com</div>
-            <div class="small text-muted-2" style="font-size:11px;">Yesterday</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+{% block title %}
+Dashboard
 {% endblock %}
 
+
+{% block content %}
+
+
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4 reveal">
+
+    <div>
+
+        <h3 class="font-display fw-bold text-white mb-1">
+            Security Overview
+        </h3>
+
+
+        <p class="section-sub mb-0">
+            Live security posture monitoring dashboard
+        </p>
+
+    </div>
+
+
+
+    <div class="d-flex gap-2">
+
+
+        <a href="#" 
+           id="runScanBtn"
+           class="btn btn-sentinel">
+
+            <i class="fa-solid fa-magnifying-glass-chart me-2"></i>
+
+            Run New Scan
+
+        </a>
+
+
+
+        <a href="{{ url_for('reports') }}"
+           class="btn btn-ghost">
+
+            <i class="fa-solid fa-file-arrow-down me-2"></i>
+
+            Export Report
+
+        </a>
+
+
+    </div>
+
+
+</div>
+
+
+
+
+
+<!-- SCORE CARDS -->
+
+<div class="row g-3 mb-3">
+
+
+
+    <!-- Security Score -->
+
+    <div class="col-xl-3 col-md-6">
+
+
+        <div class="card-glass card-pad h-100 reveal">
+
+
+            <div class="stat-label">
+                Security Score
+            </div>
+
+
+            <div id="securityScore"
+                 class="stat-value"
+                 style="color:var(--green)">
+
+                0
+
+            </div>
+
+
+            <div class="small text-muted-2">
+                AI calculated security rating
+            </div>
+
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+    <!-- Risk Score -->
+
+    <div class="col-xl-3 col-md-6">
+
+
+        <div class="card-glass card-pad h-100 reveal">
+
+
+            <div class="stat-label">
+
+                <i class="fa-solid fa-triangle-exclamation"></i>
+
+                Risk Score
+
+            </div>
+
+
+
+            <div id="riskScore"
+                 class="stat-value"
+                 style="color:var(--red)">
+
+                0
+
+            </div>
+
+
+            <div class="small text-muted-2">
+
+                Higher means more risk
+
+            </div>
+
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+
+    <!-- Assets -->
+
+
+    <div class="col-xl-3 col-md-6">
+
+
+        <div class="card-glass card-pad h-100 reveal">
+
+
+            <div class="stat-label">
+
+                <i class="fa-solid fa-server"></i>
+
+                Total Assets
+
+            </div>
+
+
+            <div class="stat-value">
+
+                48
+
+            </div>
+
+
+            <div class="small text-muted-2">
+
+                Domains monitored
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+
+
+    <!-- Vulnerabilities -->
+
+
+    <div class="col-xl-3 col-md-6">
+
+
+        <div class="card-glass card-pad h-100 reveal">
+
+
+            <div class="stat-label">
+
+                <i class="fa-solid fa-bug"></i>
+
+                Critical Vulnerabilities
+
+            </div>
+
+
+            <div id="criticalVulns"
+                 class="stat-value"
+                 style="color:var(--amber)">
+
+                0
+
+            </div>
+
+
+            <div class="small text-muted-2">
+
+                Detected issues
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+</div>
+<!-- CHART SECTION -->
+
+<div class="row g-3 mb-3">
+
+
+    <!-- Risk Trend Chart -->
+
+    <div class="col-xl-5">
+
+        <div class="card-glass card-pad reveal">
+
+
+            <div class="section-title mb-2">
+
+                Risk Trend
+
+            </div>
+
+
+            <canvas id="riskTrendChart"
+                    height="200">
+            </canvas>
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+
+    <!-- Severity Chart -->
+
+    <div class="col-xl-4">
+
+        <div class="card-glass card-pad reveal">
+
+
+            <div class="section-title mb-2">
+
+                Severity Breakdown
+
+            </div>
+
+
+            <canvas id="severityPieChart"
+                    height="200">
+            </canvas>
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+
+
+    <!-- Ports Chart -->
+
+
+    <div class="col-xl-3">
+
+        <div class="card-glass card-pad reveal">
+
+
+            <div class="section-title mb-2">
+
+                Open Ports
+
+            </div>
+
+
+            <canvas id="openPortsChart"
+                    height="200">
+            </canvas>
+
+
+        </div>
+
+
+    </div>
+
+
+
+</div>
+
+
+
+
+
+
+
+<!-- RECENT SCANS -->
+
+
+<div class="row g-3">
+
+
+<div class="col-xl-8">
+
+
+<div class="card-glass reveal">
+
+
+<div class="card-pad">
+
+
+<div class="d-flex justify-content-between align-items-center">
+
+
+<div class="section-title">
+
+Recent Scans
+
+</div>
+
+
+
+<pre id="scanResult"
+     style="display:none;"></pre>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+<div class="table-responsive">
+
+
+<table class="table-sentinel mb-0">
+
+
+<thead>
+
+<tr>
+
+<th>
+Target
+</th>
+
+
+<th>
+Type
+</th>
+
+
+<th>
+Risk
+</th>
+
+
+<th>
+Status
+</th>
+
+
+</tr>
+
+
+</thead>
+
+
+
+
+<tbody>
+
+
+<tr>
+
+<td class="mono">
+example.com
+</td>
+
+
+<td>
+Full Scan
+</td>
+
+
+<td style="color:var(--red)">
+75
+</td>
+
+
+<td>
+
+<span class="badge-soft badge-active">
+
+Completed
+
+</span>
+
+</td>
+
+
+</tr>
+
+
+
+
+
+<tr>
+
+<td class="mono">
+api.example.com
+</td>
+
+
+<td>
+Port Scan
+</td>
+
+
+<td style="color:var(--amber)">
+45
+</td>
+
+
+<td>
+
+<span class="badge-soft badge-active">
+
+Completed
+
+</span>
+
+</td>
+
+
+</tr>
+
+
+
+
+
+</tbody>
+
+
+</table>
+
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- ALERT SECTION -->
+
+
+<div class="col-xl-4">
+
+
+<div class="card-glass card-pad reveal">
+
+
+<div class="section-title mb-3">
+
+Latest Alerts
+
+</div>
+
+
+
+
+
+<div class="d-flex flex-column gap-3">
+
+
+
+<div>
+
+<i class="fa-solid fa-bug"
+style="color:var(--red)">
+</i>
+
+
+<span class="ms-2">
+
+Critical vulnerability detected
+
+</span>
+
+
+</div>
+
+
+
+
+
+<div>
+
+<i class="fa-solid fa-lock-open"
+style="color:var(--amber)">
+</i>
+
+
+<span class="ms-2">
+
+Open port detected
+
+</span>
+
+
+</div>
+
+
+
+
+
+<div>
+
+<i class="fa-solid fa-shield"
+style="color:var(--green)">
+</i>
+
+
+<span class="ms-2">
+
+Security scan completed
+
+</span>
+
+
+</div>
+
+
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+</div>
 {% block extra_js %}
+
+
 <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+
+
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const trendCtx = document.getElementById('riskTrendChart');
-  new Chart(trendCtx, {
-    type: 'line',
-    data: {
-      labels: ['Jul 14','Jul 16','Jul 18','Jul 20','Jul 22','Jul 24','Jul 26','Jul 28'],
-      datasets: [
-        {
-          label: 'Risk Score',
-          data: [48, 51, 58, 55, 62, 59, 66, 64],
-          borderColor: SENTINEL_PALETTE.red,
-          backgroundColor: sentinelGradient(trendCtx.getContext('2d'), SENTINEL_PALETTE.red),
-          fill: true, tension: .4, pointRadius: 0, borderWidth: 2.5
-        },
-        {
-          label: 'Security Score',
-          data: [70, 71, 73, 75, 76, 78, 80, 82],
-          borderColor: SENTINEL_PALETTE.green,
-          backgroundColor: sentinelGradient(trendCtx.getContext('2d'), SENTINEL_PALETTE.green),
-          fill: true, tension: .4, pointRadius: 0, borderWidth: 2.5
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      interaction: { mode: 'index', intersect: false },
-      scales: {
-        x: { grid: { color: SENTINEL_PALETTE.grid } },
-        y: { grid: { color: SENTINEL_PALETTE.grid }, min: 0, max: 100 }
-      },
-      plugins: { legend: { position: 'bottom' } }
-    }
-  });
 
-  new Chart(document.getElementById('severityPieChart'), {
-    type: 'doughnut',
-    data: {
-      labels: ['Critical', 'High', 'Medium', 'Low'],
-      datasets: [{
-        data: [7, 14, 22, 41],
-        backgroundColor: [SENTINEL_PALETTE.red, SENTINEL_PALETTE.amber, SENTINEL_PALETTE.blue, SENTINEL_PALETTE.green],
-        borderWidth: 0, hoverOffset: 6
-      }]
-    },
-    options: { responsive: true, cutout: '68%', plugins: { legend: { position: 'bottom' } } }
-  });
 
-  new Chart(document.getElementById('openPortsChart'), {
-    type: 'bar',
-    data: {
-      labels: ['22','80','443','3306','8080','8443'],
-      datasets: [{
-        data: [12, 40, 44, 6, 9, 5],
-        backgroundColor: SENTINEL_PALETTE.blue,
-        borderRadius: 6, maxBarThickness: 22
-      }]
-    },
-    options: {
-      responsive: true, indexAxis: 'y',
-      scales: { x: { grid: { color: SENTINEL_PALETTE.grid } }, y: { grid: { display: false } } },
-      plugins: { legend: { display: false } }
-    }
-  });
-});
-</script>
 document.addEventListener("DOMContentLoaded",()=>{
 
-const scanBtn = document.getElementById("runScanBtn");
+
+
+/* ==========================
+   CHARTS
+========================== */
+
+
+const trend = document.getElementById("riskTrendChart");
+
+
+if(trend){
+
+
+new Chart(trend,{
+
+type:"line",
+
+data:{
+
+
+labels:[
+"Day 1",
+"Day 2",
+"Day 3",
+"Day 4",
+"Day 5",
+"Day 6"
+],
+
+
+datasets:[
+
+{
+
+
+label:"Risk Score",
+
+
+data:[
+30,
+45,
+40,
+60,
+55,
+70
+],
+
+
+borderColor:
+SENTINEL_PALETTE.red,
+
+
+tension:.4
+
+
+
+},
+
+
+
+{
+
+
+label:"Security Score",
+
+
+data:[
+70,
+65,
+75,
+80,
+85,
+90
+],
+
+
+borderColor:
+SENTINEL_PALETTE.green,
+
+
+tension:.4
+
+
+}
+
+
+
+]
+
+
+},
+
+
+
+options:{
+
+
+responsive:true
+
+
+}
+
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+const severity =
+document.getElementById("severityPieChart");
+
+
+
+if(severity){
+
+
+new Chart(severity,{
+
+
+type:"doughnut",
+
+
+data:{
+
+
+labels:[
+
+"Critical",
+"High",
+"Medium",
+"Low"
+
+],
+
+
+
+datasets:[{
+
+
+data:[
+
+5,
+10,
+20,
+40
+
+]
+
+
+}]
+
+
+}
+
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+
+const ports =
+document.getElementById("openPortsChart");
+
+
+
+if(ports){
+
+
+new Chart(ports,{
+
+
+type:"bar",
+
+
+data:{
+
+
+labels:[
+
+"22",
+"80",
+"443",
+"8080"
+
+],
+
+
+datasets:[{
+
+
+data:[
+
+10,
+30,
+50,
+15
+
+]
+
+
+}]
+
+
+}
+
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+/* ==========================
+   SCANNER API CONNECTION
+========================== */
+
+
+
+const scanBtn =
+document.getElementById("runScanBtn");
+
+
 
 
 if(scanBtn){
 
-scanBtn.addEventListener("click",()=>{
 
 
-let domain = prompt("Enter Domain:");
+scanBtn.addEventListener("click",async()=>{
 
-if(!domain)
+
+
+let target =
+prompt("Enter domain:");
+
+
+
+if(!target)
 return;
 
 
-fetch("/api/scanner/scan",{
+
+
+try{
+
+
+
+const response =
+await fetch("/api/scanner/scan",{
+
 
 method:"POST",
 
+
 headers:{
+
+
 "Content-Type":"application/json"
+
+
 },
+
+
 
 body:JSON.stringify({
 
-target:domain
+
+target:target
+
 
 })
 
-})
+
+});
 
 
-.then(res=>res.json())
-
-.then(data=>{
 
 
-console.log(data);
+
+const result =
+await response.json();
 
 
-// security score
 
-if(data.data.security_score){
 
-document.getElementById("securityScore").innerText =
-data.data.security_score;
+console.log(result);
+
+
+
+
+
+let data =
+result.data || result;
+
+
+
+
+
+
+/*
+ Update Security Score
+*/
+
+
+if(data.security_score){
+
+
+document.getElementById(
+"securityScore"
+).innerText =
+data.security_score;
+
 
 }
 
 
-// risk score
 
-if(data.data.risk_score){
 
-document.getElementById("riskScore").innerText =
-data.data.risk_score;
+
+
+/*
+ Update Risk Score
+*/
+
+
+if(data.risk_score){
+
+
+document.getElementById(
+"riskScore"
+).innerText =
+data.risk_score;
+
 
 }
 
 
-// vulnerabilities
 
-if(data.data.vulnerabilities){
 
-document.getElementById("criticalVulns").innerText =
-data.data.vulnerabilities.length;
+
+
+
+/*
+ Update Vulnerabilities
+*/
+
+
+if(data.vulnerabilities){
+
+
+document.getElementById(
+"criticalVulns"
+).innerText =
+data.vulnerabilities.length;
+
 
 }
+
+
+
+
+
+
+/*
+ Show Raw Result
+*/
+
+
+const output =
+document.getElementById("scanResult");
+
+
+
+if(output){
+
+
+output.style.display="block";
+
+
+output.innerText =
+JSON.stringify(
+data,
+null,
+2
+);
+
+
+
+}
+
+
 
 
 alert("Scan Completed");
 
 
-})
+
+}
+
+catch(error){
 
 
-.catch(err=>{
 
-console.log(err);
+console.error(error);
+
 
 alert("Scan Failed");
-
-});
-
-
-});
 
 
 }
 
 
+
 });
+
+
+
+}
+
+
+
+});
+
+
+
+</script>
+
+
 {% endblock %}
