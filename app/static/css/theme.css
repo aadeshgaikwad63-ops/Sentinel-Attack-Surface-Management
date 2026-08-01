@@ -47,6 +47,9 @@
   --font-display: 'Space Grotesk', 'Segoe UI', sans-serif;
   --font-body:    'Inter', 'Segoe UI', sans-serif;
   --font-mono:    'JetBrains Mono', 'Consolas', monospace;
+  --line-height-body: 1.65;
+  --line-height-tight: 1.12;
+  --letter-spacing-tight: -0.02em;
 
   /* --- Shape / Motion --- */
   --radius-sm: 8px;
@@ -120,6 +123,11 @@ html, body{
   background: var(--bg);
   color: var(--text-primary);
   font-family: var(--font-body);
+  font-size: 16px;
+  line-height: var(--line-height-body);
+  letter-spacing: -0.01em;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 body{
@@ -129,10 +137,19 @@ body{
   background-attachment: fixed;
 }
 
-h1,h2,h3,h4,h5, .font-display{ font-family: var(--font-display); letter-spacing: -.01em; }
+h1,h2,h3,h4,h5, .font-display{ font-family: var(--font-display); letter-spacing: var(--letter-spacing-tight); line-height: var(--line-height-tight); }
 .font-mono, code, .mono{ font-family: var(--font-mono); }
 small, .text-secondary{ color: var(--text-secondary) !important; }
 .text-muted-2{ color: var(--text-muted); }
+p, li, label, .form-control, .dropdown-item, .table, .badge, .btn, .nav-link, .alert{ font-family: var(--font-body); }
+.btn, .btn-outline-danger-soft, .icon-btn, .nav-link, .form-control, .form-select, .form-label-dark, .dropdown-item{ font-weight: 600; letter-spacing: -0.01em; }
+.table{ font-size: .92rem; line-height: 1.55; }
+.table th{ font-family: var(--font-body); font-weight: 600; letter-spacing: .01em; text-transform: uppercase; font-size: .76rem; color: var(--text-secondary); }
+.table td{ font-family: var(--font-body); font-weight: 500; }
+.content h1{ font-size: clamp(1.8rem, 2.6vw, 2.55rem); margin-bottom: .6rem; }
+.content h2{ font-size: clamp(1.35rem, 2vw, 1.8rem); margin-bottom: .5rem; }
+.content h3{ font-size: clamp(1.1rem, 1.5vw, 1.3rem); margin-bottom: .4rem; }
+.content p, .content li, .content label{ font-size: .96rem; line-height: 1.65; }
 
 a{ color: var(--blue); text-decoration: none; }
 a:hover{ color: #6BA9FF; }

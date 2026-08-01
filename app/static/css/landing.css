@@ -48,7 +48,11 @@
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-body);
-  line-height: 1.55;
+  font-size: 16px;
+  line-height: 1.7;
+  letter-spacing: -0.01em;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
   overflow-x: clip;
 }
 
@@ -109,8 +113,10 @@
   gap: 8px;
   padding: 12px 22px;
   border-radius: var(--radius-sm);
+  font-family: var(--font-body);
   font-weight: 600;
   font-size: 0.92rem;
+  letter-spacing: -0.01em;
   cursor: pointer;
   border: 1px solid transparent;
   transition: transform .15s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
@@ -170,6 +176,8 @@
 }
 .sasm .hero h1 {
   font-size: clamp(2.3rem, 4.2vw, 3.5rem);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
 }
 .sasm .hero h1 .accent-text {
   background: var(--gradient-signal);
@@ -179,7 +187,8 @@
 }
 .sasm .hero-sub {
   color: var(--muted);
-  font-size: 1.12rem;
+  font-size: 1.06rem;
+  line-height: 1.72;
   max-width: 540px;
   margin: 20px 0 32px;
 }
