@@ -1,0 +1,1066 @@
+{% extends "base.html" %}
+
+{% set active_page = 'dashboard' %}
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+
+{% block content %}
+
+
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4 reveal">
+
+    <div>
+
+        <h3 class="font-display fw-bold text-white mb-1">
+            Security Overview
+        </h3>
+
+
+        <p class="section-sub mb-0">
+            Live security posture monitoring dashboard
+        </p>
+
+    </div>
+
+
+
+    <div class="d-flex gap-2">
+
+
+        <a href="#" 
+           id="runScanBtn"
+           class="btn btn-sentinel">
+
+            <i class="fa-solid fa-magnifying-glass-chart me-2"></i>
+
+            Run New Scan
+
+        </a>
+
+
+
+        <a href="{{ url_for('reports') }}"
+           class="btn btn-ghost">
+
+            <i class="fa-solid fa-file-arrow-down me-2"></i>
+
+            Export Report
+
+        </a>
+
+
+    </div>
+
+
+</div>
+
+
+
+
+
+<!-- SCORE CARDS -->
+
+<div class="row g-3 mb-3">
+
+
+
+    <!-- Security Score -->
+
+    <div class="col-xl-3 col-md-6">
+
+
+        <div class="card-glass card-pad h-100 reveal">
+
+
+            <div class="stat-label">
+                Security Score
+            </div>
+
+
+            <div id="securityScore"
+                 class="stat-value"
+                 style="color:var(--green)">
+
+                0
+
+            </div>
+
+
+            <div class="small text-muted-2">
+                AI calculated security rating
+            </div>
+
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+    <!-- Risk Score -->
+
+    <div class="col-xl-3 col-md-6">
+
+
+        <div class="card-glass card-pad h-100 reveal">
+
+
+            <div class="stat-label">
+
+                <i class="fa-solid fa-triangle-exclamation"></i>
+
+                Risk Score
+
+            </div>
+
+
+
+            <div id="riskScore"
+                 class="stat-value"
+                 style="color:var(--red)">
+
+                0
+
+            </div>
+
+
+            <div class="small text-muted-2">
+
+                Higher means more risk
+
+            </div>
+
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+
+    <!-- Assets -->
+
+
+    <div class="col-xl-3 col-md-6">
+
+
+        <div class="card-glass card-pad h-100 reveal">
+
+
+            <div class="stat-label">
+
+                <i class="fa-solid fa-server"></i>
+
+                Total Assets
+
+            </div>
+
+
+            <div class="stat-value">
+
+                48
+
+            </div>
+
+
+            <div class="small text-muted-2">
+
+                Domains monitored
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+
+
+    <!-- Vulnerabilities -->
+
+
+    <div class="col-xl-3 col-md-6">
+
+
+        <div class="card-glass card-pad h-100 reveal">
+
+
+            <div class="stat-label">
+
+                <i class="fa-solid fa-bug"></i>
+
+                Critical Vulnerabilities
+
+            </div>
+
+
+            <div id="criticalVulns"
+                 class="stat-value"
+                 style="color:var(--amber)">
+
+                0
+
+            </div>
+
+
+            <div class="small text-muted-2">
+
+                Detected issues
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+</div>
+<!-- CHART SECTION -->
+
+<div class="row g-3 mb-3">
+
+
+    <!-- Risk Trend Chart -->
+
+    <div class="col-xl-5">
+
+        <div class="card-glass card-pad reveal">
+
+
+            <div class="section-title mb-2">
+
+                Risk Trend
+
+            </div>
+
+
+            <canvas id="riskTrendChart"
+                    height="200">
+            </canvas>
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+
+    <!-- Severity Chart -->
+
+    <div class="col-xl-4">
+
+        <div class="card-glass card-pad reveal">
+
+
+            <div class="section-title mb-2">
+
+                Severity Breakdown
+
+            </div>
+
+
+            <canvas id="severityPieChart"
+                    height="200">
+            </canvas>
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+
+
+    <!-- Ports Chart -->
+
+
+    <div class="col-xl-3">
+
+        <div class="card-glass card-pad reveal">
+
+
+            <div class="section-title mb-2">
+
+                Open Ports
+
+            </div>
+
+
+            <canvas id="openPortsChart"
+                    height="200">
+            </canvas>
+
+
+        </div>
+
+
+    </div>
+
+
+
+</div>
+
+
+
+
+
+
+
+<!-- RECENT SCANS -->
+
+
+<div class="row g-3">
+
+
+<div class="col-xl-8">
+
+
+<div class="card-glass reveal">
+
+
+<div class="card-pad">
+
+
+<div class="d-flex justify-content-between align-items-center">
+
+
+<div class="section-title">
+
+Recent Scans
+
+</div>
+
+
+
+<pre id="scanResult"
+     style="display:none;"></pre>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+<div class="table-responsive">
+
+
+<table class="table-sentinel mb-0">
+
+
+<thead>
+
+<tr>
+
+<th>
+Target
+</th>
+
+
+<th>
+Type
+</th>
+
+
+<th>
+Risk
+</th>
+
+
+<th>
+Status
+</th>
+
+
+</tr>
+
+
+</thead>
+
+
+
+
+<tbody>
+
+
+<tr>
+
+<td class="mono">
+example.com
+</td>
+
+
+<td>
+Full Scan
+</td>
+
+
+<td style="color:var(--red)">
+75
+</td>
+
+
+<td>
+
+<span class="badge-soft badge-active">
+
+Completed
+
+</span>
+
+</td>
+
+
+</tr>
+
+
+
+
+
+<tr>
+
+<td class="mono">
+api.example.com
+</td>
+
+
+<td>
+Port Scan
+</td>
+
+
+<td style="color:var(--amber)">
+45
+</td>
+
+
+<td>
+
+<span class="badge-soft badge-active">
+
+Completed
+
+</span>
+
+</td>
+
+
+</tr>
+
+
+
+
+
+</tbody>
+
+
+</table>
+
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- ALERT SECTION -->
+
+
+<div class="col-xl-4">
+
+
+<div class="card-glass card-pad reveal">
+
+
+<div class="section-title mb-3">
+
+Latest Alerts
+
+</div>
+
+
+
+
+
+<div class="d-flex flex-column gap-3">
+
+
+
+<div>
+
+<i class="fa-solid fa-bug"
+style="color:var(--red)">
+</i>
+
+
+<span class="ms-2">
+
+Critical vulnerability detected
+
+</span>
+
+
+</div>
+
+
+
+
+
+<div>
+
+<i class="fa-solid fa-lock-open"
+style="color:var(--amber)">
+</i>
+
+
+<span class="ms-2">
+
+Open port detected
+
+</span>
+
+
+</div>
+
+
+
+
+
+<div>
+
+<i class="fa-solid fa-shield"
+style="color:var(--green)">
+</i>
+
+
+<span class="ms-2">
+
+Security scan completed
+
+</span>
+
+
+</div>
+
+
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+</div>
+{% block extra_js %}
+
+
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+
+
+<script>
+
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+
+
+/* ==========================
+   CHARTS
+========================== */
+
+
+const trend = document.getElementById("riskTrendChart");
+
+
+if(trend){
+
+
+new Chart(trend,{
+
+type:"line",
+
+data:{
+
+
+labels:[
+"Day 1",
+"Day 2",
+"Day 3",
+"Day 4",
+"Day 5",
+"Day 6"
+],
+
+
+datasets:[
+
+{
+
+
+label:"Risk Score",
+
+
+data:[
+30,
+45,
+40,
+60,
+55,
+70
+],
+
+
+borderColor:
+SENTINEL_PALETTE.red,
+
+
+tension:.4
+
+
+
+},
+
+
+
+{
+
+
+label:"Security Score",
+
+
+data:[
+70,
+65,
+75,
+80,
+85,
+90
+],
+
+
+borderColor:
+SENTINEL_PALETTE.green,
+
+
+tension:.4
+
+
+}
+
+
+
+]
+
+
+},
+
+
+
+options:{
+
+
+responsive:true
+
+
+}
+
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+const severity =
+document.getElementById("severityPieChart");
+
+
+
+if(severity){
+
+
+new Chart(severity,{
+
+
+type:"doughnut",
+
+
+data:{
+
+
+labels:[
+
+"Critical",
+"High",
+"Medium",
+"Low"
+
+],
+
+
+
+datasets:[{
+
+
+data:[
+
+5,
+10,
+20,
+40
+
+]
+
+
+}]
+
+
+}
+
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+
+const ports =
+document.getElementById("openPortsChart");
+
+
+
+if(ports){
+
+
+new Chart(ports,{
+
+
+type:"bar",
+
+
+data:{
+
+
+labels:[
+
+"22",
+"80",
+"443",
+"8080"
+
+],
+
+
+datasets:[{
+
+
+data:[
+
+10,
+30,
+50,
+15
+
+]
+
+
+}]
+
+
+}
+
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+/* ==========================
+   SCANNER API CONNECTION
+========================== */
+
+
+
+const scanBtn =
+document.getElementById("runScanBtn");
+
+
+
+
+if(scanBtn){
+
+
+
+scanBtn.addEventListener("click",async()=>{
+
+
+
+let target =
+prompt("Enter domain:");
+
+
+
+if(!target)
+return;
+
+
+
+
+try{
+
+
+
+const response =
+await fetch("/api/scanner/scan",{
+
+
+method:"POST",
+
+
+headers:{
+
+
+"Content-Type":"application/json"
+
+
+},
+
+
+
+body:JSON.stringify({
+
+
+target:target
+
+
+})
+
+
+});
+
+
+
+
+
+const result =
+await response.json();
+
+
+
+
+console.log(result);
+
+
+
+
+
+let data =
+result.data || result;
+
+
+
+
+
+
+/*
+ Update Security Score
+*/
+
+
+if(data.security_score){
+
+
+document.getElementById(
+"securityScore"
+).innerText =
+data.security_score;
+
+
+}
+
+
+
+
+
+
+/*
+ Update Risk Score
+*/
+
+
+if(data.risk_score){
+
+
+document.getElementById(
+"riskScore"
+).innerText =
+data.risk_score;
+
+
+}
+
+
+
+
+
+
+
+/*
+ Update Vulnerabilities
+*/
+
+
+if(data.vulnerabilities){
+
+
+document.getElementById(
+"criticalVulns"
+).innerText =
+data.vulnerabilities.length;
+
+
+}
+
+
+
+
+
+
+/*
+ Show Raw Result
+*/
+
+
+const output =
+document.getElementById("scanResult");
+
+
+
+if(output){
+
+
+output.style.display="block";
+
+
+output.innerText =
+JSON.stringify(
+data,
+null,
+2
+);
+
+
+
+}
+
+
+
+
+alert("Scan Completed");
+
+
+
+}
+
+catch(error){
+
+
+
+console.error(error);
+
+
+alert("Scan Failed");
+
+
+}
+
+
+
+});
+
+
+
+}
+
+
+
+});
+
+
+
+</script>
+
+
+{% endblock %}

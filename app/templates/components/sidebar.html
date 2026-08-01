@@ -1,0 +1,48 @@
+<aside class="sidebar" id="sentinelSidebar" aria-label="Primary navigation">
+  <div class="brand">
+    <div class="brand-mark"><i class="fa-solid fa-satellite-dish"></i></div>
+    <div class="brand-text">
+      <div class="b1">Sentinel<span>ASM</span></div>
+      <div class="b2">Attack Surface</div>
+    </div>
+  </div>
+
+  <nav class="side-nav" role="navigation" aria-label="Main menu">
+    <div class="side-section-title">Overview</div>
+    <a href="{{ url_for('dashboard.dashboard') }}" class="nav-link {{ 'active' if active_page == 'dashboard' }}">
+      <i class="fa-solid fa-gauge-high"></i><span class="side-label">Dashboard</span>
+    </a>
+    <a href="{{ url_for('assets.assets') }}" class="nav-link {{ 'active' if active_page == 'assets' }}">
+      <i class="fa-solid fa-server"></i><span class="side-label">Assets</span>
+    </a>
+
+    <div class="side-section-title">Discovery</div>
+    <a href="{{ url_for('scanner.new_scan') }}" class="nav-link {{ 'active' if active_page == 'new_scan' }}">
+      <i class="fa-solid fa-magnifying-glass-chart"></i><span class="side-label">New Scan</span>
+    </a>
+    <a href="{{ url_for('reports.reports') }}" class="nav-link {{ 'active' if active_page == 'reports' }}">
+      <i class="fa-solid fa-file-shield"></i><span class="side-label">Reports</span>
+    </a>
+    <a href="{{ url_for('ai.ai_assistant') }}" class="nav-link {{ 'active' if active_page == 'ai_assistant' }}">
+      <i class="fa-solid fa-robot"></i><span class="side-label">AI Assistant</span>
+    </a>
+
+    <div class="side-section-title">Administration</div>
+    <a href="{{ url_for('user_management.user_management') }}" class="nav-link {{ 'active' if active_page == 'user_management' }}">
+      <i class="fa-solid fa-users-gear"></i><span class="side-label">Users</span>
+    </a>
+    <a href="{{ url_for('settings.settings') }}" class="nav-link {{ 'active' if active_page == 'settings' }}">
+      <i class="fa-solid fa-sliders"></i><span class="side-label">Settings</span>
+    </a>
+    <a href="{{ url_for('profile.view_profile') }}" class="nav-link {{ 'active' if active_page == 'profile' }}">
+      <i class="fa-solid fa-id-badge"></i><span class="side-label">Profile</span>
+    </a>
+  </nav>
+
+  <div class="side-foot">
+    <a href="{{ url_for('auth.logout') }}" class="nav-link nav-logout">
+      <i class="fa-solid fa-arrow-right-from-bracket"></i><span class="side-label">Logout</span>
+    </a>
+  </div>
+</aside>
+<div class="sidebar-backdrop d-lg-none" id="sidebarBackdrop"></div>

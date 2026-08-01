@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{% block title %}SentinelASM — AI-Powered Attack Surface Management{% endblock %}</title>
+  <meta name="description" content="SentinelASM continuously discovers, monitors and prioritizes every internet-facing asset in your organization, so exposures get fixed before attackers find them.">
+
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon.svg') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="sasm">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  {% include 'components/public_nav.html' %}
+
+  <main id="main">
+    <!-- ========================= HERO ========================= -->
+    <section class="hero">
+      <div class="cyber-bg" aria-hidden="true"></div>
+      <div class="hero-particles js-hero-particles" aria-hidden="true"></div>
+      <div class="wrap hero-grid">
+        <div>
+          <p class="eyebrow">Continuous Attack Surface Management</p>
+          <div class="hero-badges">
+            <span class="hero-badge"><i class="fa-solid fa-robot"></i> AI Powered</span>
+            <span class="hero-badge"><i class="fa-solid fa-building-shield"></i> Enterprise Ready</span>
+            <span class="hero-badge"><i class="fa-solid fa-eye"></i> Real-Time Visibility</span>
+          </div>
+          <h1>Find every exposed asset <span class="accent-text">before someone else does.</span></h1>
+          <p class="hero-sub">SentinelASM continuously discovers, fingerprints and monitors every domain, subdomain, IP, port and cloud asset tied to your organization — then uses AI to tell you which exposures actually matter.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary btn-lg" href="{{ url_for('auth.register') }}">
+              <i class="fa-solid fa-radar"></i> Start your free scan
+            </a>
+            <a class="btn btn-ghost btn-lg" href="#how-it-works">
+              <i class="fa-solid fa-play"></i> See how it works
+            </a>
+          </div>
+          <div class="hero-meta">
+            <div><strong>&lt; 5 min</strong>time to first result</div>
+            <div><strong>No agents</strong>fully external scanning</div>
+            <div><strong>SOC 2</strong>aligned controls</div>
+          </div>
+        </div>
+        <div class="hero-visual reveal">
+          <div class="hero-visual-head">
+            <span><span class="dot"></span>LIVE_SCAN.sentinelasm.io</span>
+            <span>22 assets tracked</span>
+          </div>
+          <canvas class="graph-canvas js-graph-canvas" role="img" aria-label="Animated illustration of a live network of monitored assets, colour-coded by exposure status"></canvas>
+          <div class="hero-visual-legend">
+            <span><i class="legend-dot" style="background:#00e676"></i>Secured</span>
+            <span><i class="legend-dot" style="background:#3b82f6"></i>Monitoring</span>
+            <span><i class="legend-dot" style="background:#d29922"></i>Exposed</span>
+            <span><i class="legend-dot" style="background:#f85149"></i>Critical</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= FEATURES GRID ========================= -->
+    <section class="section" id="features">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">Platform</p>
+          <h2>Everything you need to manage exposure, in one place</h2>
+          <p>Replace a stack of disconnected recon tools and spreadsheets with a single, continuously-updated inventory of your external footprint.</p>
+        </div>
+        <div class="grid-3">
+          <div class="card reveal">
+            <div class="card-icon"><i class="fa-solid fa-diagram-project"></i></div>
+            <h3>Asset discovery</h3>
+            <p>Automatic enumeration of domains, subdomains, IP ranges, cloud storage and shadow IT tied to your organization.</p>
+          </div>
+          <div class="card reveal">
+            <div class="card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <h3>Vulnerability scanning</h3>
+            <p>Port, service and CVE-level scanning across your entire footprint, refreshed on a rolling schedule.</p>
+          </div>
+          <div class="card reveal">
+            <div class="card-icon"><i class="fa-solid fa-robot"></i></div>
+            <h3>AI-powered triage</h3>
+            <p>Every finding is scored for real-world exploitability and business impact, so your team fixes what matters first.</p>
+          </div>
+          <div class="card reveal">
+            <div class="card-icon"><i class="fa-solid fa-lock"></i></div>
+            <h3>SSL &amp; certificate monitoring</h3>
+            <p>Get ahead of expiring certificates, weak ciphers and misconfigured TLS before they become incidents.</p>
+          </div>
+          <div class="card reveal">
+            <div class="card-icon"><i class="fa-solid fa-users-gear"></i></div>
+            <h3>Role-based access</h3>
+            <p>Admin, analyst and viewer roles keep the right people looking at the right data, with a full audit trail.</p>
+          </div>
+          <div class="card reveal">
+            <div class="card-icon"><i class="fa-solid fa-file-shield"></i></div>
+            <h3>Reporting &amp; export</h3>
+            <p>Board-ready and technical reports, generated on demand or on a schedule, exportable to PDF and CSV.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= HOW IT WORKS / LIFECYCLE ========================= -->
+    <section class="section" id="how-it-works">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">Lifecycle</p>
+          <h2>The four stages of continuous exposure management</h2>
+          <p>SentinelASM runs this loop continuously, not just at scan time — so your inventory reflects reality, not last quarter's audit.</p>
+        </div>
+        <div class="lifecycle">
+          <div class="lifecycle-step reveal">
+            <span class="step-tag">01 · DISCOVER</span>
+            <h3>Map the footprint</h3>
+            <p>Passive and active recon builds a live inventory of domains, IPs, ports and cloud assets.</p>
+          </div>
+          <div class="lifecycle-step reveal">
+            <span class="step-tag">02 · ASSESS</span>
+            <h3>Fingerprint &amp; scan</h3>
+            <p>Every asset is fingerprinted for technology, version and known vulnerabilities.</p>
+          </div>
+          <div class="lifecycle-step reveal">
+            <span class="step-tag">03 · PRIORITIZE</span>
+            <h3>Score with AI</h3>
+            <p>Findings are ranked by exploitability, exposure and business context — not raw CVSS alone.</p>
+          </div>
+          <div class="lifecycle-step reveal">
+            <span class="step-tag">04 · REMEDIATE</span>
+            <h3>Fix &amp; verify</h3>
+            <p>Assign, track and re-verify fixes, with a full history of every exposure window.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= AI POWERED DETECTION (split) ========================= -->
+    <section class="section">
+      <div class="wrap split">
+        <div class="reveal">
+          <p class="eyebrow">AI-Powered Detection</p>
+          <h2>Cut through the noise with context-aware scoring</h2>
+          <p class="lead">Traditional scanners hand you a wall of CVEs. SentinelASM's detection engine correlates exposure, exploit availability and asset criticality to surface the handful of findings that actually deserve attention today.</p>
+          <ul class="check-list">
+            <li><i class="fa-solid fa-circle-check"></i> Exploit-availability and chain-risk modelling, not just CVSS score</li>
+            <li><i class="fa-solid fa-circle-check"></i> Automatic de-duplication across scans and asset changes</li>
+            <li><i class="fa-solid fa-circle-check"></i> Plain-language explanations analysts can hand straight to engineering</li>
+          </ul>
+          <a class="btn btn-ghost" href="{{ url_for('auth.register') }}">Try AI triage <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <div class="split-media reveal">
+          <div class="mono-line"><span>CVE-2024-32019 · api.internal.example.com</span><span class="val-crit">CRITICAL</span></div>
+          <div class="mono-line"><span>TLS 1.0 enabled · legacy.example.com:443</span><span class="val-warn">WARNING</span></div>
+          <div class="mono-line"><span>S3 bucket public-read · assets-prod</span><span class="val-crit">CRITICAL</span></div>
+          <div class="mono-line"><span>22/tcp OPEN · bastion.example.com</span><span class="val-warn">REVIEW</span></div>
+          <div class="mono-line"><span>Cert renewed · shop.example.com</span><span class="val-ok">RESOLVED</span></div>
+          <div class="mono-line"><span>WAF rule verified · edge.example.com</span><span class="val-ok">SECURED</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= ATTACK SURFACE MONITORING (split reverse) ========================= -->
+    <section class="section split-reverse">
+      <div class="wrap split split-reverse">
+        <div class="split-media reveal">
+          <div class="grid-2" style="gap:14px;">
+            <div class="stat-tile"><div class="num">1,284</div><div class="lbl">Assets discovered</div></div>
+            <div class="stat-tile"><div class="num">37</div><div class="lbl">New this week</div></div>
+            <div class="stat-tile"><div class="num">9</div><div class="lbl">Critical exposures</div></div>
+            <div class="stat-tile"><div class="num">99.2%</div><div class="lbl">Coverage confidence</div></div>
+          </div>
+        </div>
+        <div class="reveal">
+          <p class="eyebrow">Attack Surface Monitoring</p>
+          <h2>Know the moment your footprint changes</h2>
+          <p class="lead">New subdomain spun up by marketing? Dev left a staging bucket public? SentinelASM watches for change continuously and alerts your team the moment something new appears on the internet wearing your name.</p>
+          <ul class="check-list">
+            <li><i class="fa-solid fa-circle-check"></i> Real-time alerts on new or changed assets</li>
+            <li><i class="fa-solid fa-circle-check"></i> Shadow IT and forgotten-infrastructure detection</li>
+            <li><i class="fa-solid fa-circle-check"></i> Historical timeline of every asset's exposure state</li>
+          </ul>
+          <a class="btn btn-ghost" href="{{ url_for('auth.register') }}">Explore monitoring <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= DASHBOARD PREVIEW / SCREENSHOTS ========================= -->
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head reveal" style="max-width:720px;">
+          <p class="eyebrow">Product Preview</p>
+          <h2>One dashboard for your entire external footprint</h2>
+          <p>A look at the workspace your team will actually live in every day.</p>
+        </div>
+        <div class="screenshot-tabs reveal" role="tablist" aria-label="Product previews">
+          <button class="js-shot-tab active" role="tab" aria-selected="true" data-target="shot-dashboard">Overview</button>
+          <button class="js-shot-tab" role="tab" aria-selected="false" data-target="shot-assets">Assets</button>
+          <button class="js-shot-tab" role="tab" aria-selected="false" data-target="shot-scan">Scan results</button>
+        </div>
+
+        <div class="preview-frame reveal">
+          <div class="preview-chrome"><span></span><span></span><span></span></div>
+
+          <div id="shot-dashboard" class="js-shot-panel preview-body">
+            <div class="grid-4">
+              <div class="stat-tile"><div class="num">1,284</div><div class="lbl">Total assets</div></div>
+              <div class="stat-tile"><div class="num">9</div><div class="lbl">Critical findings</div></div>
+              <div class="stat-tile"><div class="num">42</div><div class="lbl">Open port exposures</div></div>
+              <div class="stat-tile"><div class="num">96</div><div class="lbl">Security score</div></div>
+            </div>
+          </div>
+
+          <div id="shot-assets" class="js-shot-panel preview-body" hidden>
+            <div class="mono-line"><span>app.example.com</span><span class="val-ok">Cloud · Web app</span></div>
+            <div class="mono-line"><span>api.example.com</span><span class="val-ok">Cloud · API</span></div>
+            <div class="mono-line"><span>vpn.example.com</span><span class="val-warn">On-prem · Gateway</span></div>
+            <div class="mono-line"><span>staging.example.com</span><span class="val-crit">Cloud · Unmanaged</span></div>
+          </div>
+
+          <div id="shot-scan" class="js-shot-panel preview-body" hidden>
+            <div class="mono-line"><span>Port scan · api.example.com</span><span class="val-ok">Complete</span></div>
+            <div class="mono-line"><span>TLS audit · shop.example.com</span><span class="val-ok">Complete</span></div>
+            <div class="mono-line"><span>Subdomain enum · example.com</span><span class="val-warn">Running (63%)</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= WHY CHOOSE SENTINELASM ========================= -->
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">Why SentinelASM</p>
+          <h2>Built for teams who can't afford blind spots</h2>
+          <p>SentinelASM is designed around one idea: you can't secure what you don't know you have.</p>
+        </div>
+        <div class="grid-3">
+          <div class="card card-glass glow-card reveal">
+            <div class="card-icon"><i class="fa-solid fa-brain"></i></div>
+            <h3>AI Risk Prioritization</h3>
+            <p>Findings are scored for real-world exploitability and business impact, so your team fixes what matters first — not just what has the loudest CVSS score.</p>
+          </div>
+          <div class="card card-glass glow-card reveal">
+            <div class="card-icon"><i class="fa-solid fa-satellite-dish"></i></div>
+            <h3>External Attack Surface Discovery</h3>
+            <p>Passive and active recon maps every domain, subdomain, IP and cloud asset tied to your organization — the same way an attacker would find them.</p>
+          </div>
+          <div class="card card-glass glow-card reveal">
+            <div class="card-icon"><i class="fa-solid fa-radar"></i></div>
+            <h3>Continuous Asset Monitoring</h3>
+            <p>Your footprint changes daily. SentinelASM re-checks it daily too, and flags new or changed assets the moment they appear.</p>
+          </div>
+          <div class="card card-glass glow-card reveal">
+            <div class="card-icon"><i class="fa-solid fa-file-shield"></i></div>
+            <h3>Executive Security Reporting</h3>
+            <p>Board-ready and technical reports, generated on demand or on a schedule, so leadership and engineering stay aligned on real exposure.</p>
+          </div>
+          <div class="card card-glass glow-card reveal">
+            <div class="card-icon"><i class="fa-solid fa-users-gear"></i></div>
+            <h3>Role-Based Access Control</h3>
+            <p>Admin, analyst and viewer roles keep the right people looking at the right data, backed by a full audit trail.</p>
+          </div>
+          <div class="card card-glass glow-card reveal">
+            <div class="card-icon"><i class="fa-solid fa-building-shield"></i></div>
+            <h3>Enterprise Ready Architecture</h3>
+            <p>Built for distributed, complex footprints and role-based collaboration — designed to scale from a single domain to a global estate.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= CAPABILITIES ========================= -->
+    <section class="section stats-band" aria-label="Platform capabilities">
+      <div class="wrap">
+        <div class="grid-4">
+          <div class="card capability-card reveal">
+            <div class="card-icon"><i class="fa-solid fa-robot"></i></div>
+            <h3>AI Powered</h3>
+            <p>A context-aware detection engine behind every finding.</p>
+          </div>
+          <div class="card capability-card reveal">
+            <div class="card-icon"><i class="fa-solid fa-building-shield"></i></div>
+            <h3>Enterprise Ready</h3>
+            <p>Built for distributed teams and complex footprints.</p>
+          </div>
+          <div class="card capability-card reveal">
+            <div class="card-icon"><i class="fa-solid fa-satellite-dish"></i></div>
+            <h3>Continuous Monitoring</h3>
+            <p>Your attack surface, re-checked around the clock.</p>
+          </div>
+          <div class="card capability-card reveal">
+            <div class="card-icon"><i class="fa-solid fa-eye"></i></div>
+            <h3>Real-Time Visibility</h3>
+            <p>Know the moment your external footprint changes.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= CUSTOMER SUCCESS STORIES ========================= -->
+    <section class="section" aria-label="Customer success stories">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">Trusted by Security Teams</p>
+          <h2>Customer Success Stories</h2>
+        </div>
+        <div class="card card-glass success-story reveal">
+          <div class="card-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+          <p class="success-story-text">Customer case studies will be published after the production launch.</p>
+          <p class="success-story-sub">SentinelASM is currently in active development ahead of general availability — check back after launch for real results from real security teams.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= MEET THE DEVELOPMENT TEAM ========================= -->
+    <section class="section" id="team">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">Team</p>
+          <h2>Meet the Development Team</h2>
+          <p>A small, focused team building attack surface management the way we'd want to use it ourselves.</p>
+        </div>
+        <div class="grid-4">
+          <div class="card card-glass team-card reveal">
+            <div class="team-avatar" aria-hidden="true">AG</div>
+            <h3>Aadesh Gaikwad</h3>
+            <p class="team-role">Backend Engineer &amp; Project Lead</p>
+            <p class="team-bio">Leads SentinelASM's architecture and backend systems, from the scanning engine to the API layer.</p>
+            <div class="team-socials">
+              <a class="btn btn-ghost btn-sm" href="#" aria-label="Aadesh Gaikwad on GitHub"><i class="fa-brands fa-github"></i> GitHub</a>
+              <a class="btn btn-ghost btn-sm" href="#" aria-label="Aadesh Gaikwad on LinkedIn"><i class="fa-brands fa-linkedin-in"></i> LinkedIn</a>
+            </div>
+          </div>
+          <div class="card card-glass team-card reveal">
+            <div class="team-avatar" aria-hidden="true">FK</div>
+            <h3>Faisal Khan</h3>
+            <p class="team-role">Security Research &amp; Vulnerability Assessment</p>
+            <p class="team-bio">Builds and tunes the discovery and scanning pipelines that map every internet-facing asset.</p>
+            <div class="team-socials">
+              <a class="btn btn-ghost btn-sm" href="#" aria-label="Faisal Khan on GitHub"><i class="fa-brands fa-github"></i> GitHub</a>
+              <a class="btn btn-ghost btn-sm" href="#" aria-label="Faisal Khan on LinkedIn"><i class="fa-brands fa-linkedin-in"></i> LinkedIn</a>
+            </div>
+          </div>
+          <div class="card card-glass team-card reveal">
+            <div class="team-avatar" aria-hidden="true">AP</div>
+            <h3>Anshul Patil</h3>
+            <p class="team-role">AI Engineer &amp; Risk Intelligence</p>
+            <p class="team-bio">Designs the scoring models that turn raw findings into prioritized, actionable risk.</p>
+            <div class="team-socials">
+              <a class="btn btn-ghost btn-sm" href="#" aria-label="Anshul Patil on GitHub"><i class="fa-brands fa-github"></i> GitHub</a>
+              <a class="btn btn-ghost btn-sm" href="#" aria-label="Anshul Patil on LinkedIn"><i class="fa-brands fa-linkedin-in"></i> LinkedIn</a>
+            </div>
+          </div>
+          <div class="card card-glass team-card reveal">
+            <div class="team-avatar" aria-hidden="true">PK</div>
+            <h3>Parth Keskar</h3>
+            <p class="team-role">Frontend Engineer &amp; UI/UX Developer</p>
+            <p class="team-bio">Owns the product experience and the interface that keeps SentinelASM feeling fast and clear.</p>
+            <div class="team-socials">
+              <a class="btn btn-ghost btn-sm" href="#" aria-label="Parth Keskar on GitHub"><i class="fa-brands fa-github"></i> GitHub</a>
+              <a class="btn btn-ghost btn-sm" href="#" aria-label="Parth Keskar on LinkedIn"><i class="fa-brands fa-linkedin-in"></i> LinkedIn</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= PRICING ========================= -->
+    <section class="section" id="pricing">
+      <div class="wrap">
+        <div class="section-head reveal" style="margin:0 auto 40px; text-align:center;">
+          <p class="eyebrow" style="justify-content:center;">Pricing</p>
+          <h2>Simple plans that scale with your footprint</h2>
+          <p>Start free. Upgrade when your attack surface grows.</p>
+        </div>
+        <div class="pricing-toggle reveal">
+          <span>Monthly</span>
+          <button class="switch js-pricing-switch" role="switch" aria-checked="false" aria-label="Toggle annual billing"></button>
+          <span>Annual <span style="color:var(--accent)">(save 20%)</span></span>
+        </div>
+        <div class="pricing-grid">
+          <div class="card plan reveal">
+            <h3>Free</h3>
+            <p class="plan-desc">For individuals monitoring a single domain.</p>
+            <div class="price"><span class="js-price" data-monthly="$0" data-annual="$0">$0</span><small class="js-price-period">/month</small></div>
+            <ul class="check-list">
+              <li><i class="fa-solid fa-circle-check"></i> 1 root domain</li>
+              <li><i class="fa-solid fa-circle-check"></i> Weekly scans</li>
+              <li><i class="fa-solid fa-circle-check"></i> Basic vulnerability findings</li>
+              <li><i class="fa-solid fa-circle-check"></i> Community support</li>
+            </ul>
+            <a class="btn btn-ghost btn-block" href="{{ url_for('auth.register') }}">Start free</a>
+          </div>
+          <div class="card plan featured reveal">
+            <span class="plan-badge">MOST POPULAR</span>
+            <h3>Pro</h3>
+            <p class="plan-desc">For growing security and IT teams.</p>
+            <div class="price"><span class="js-price" data-monthly="$149" data-annual="$119">$149</span><small class="js-price-period">/month</small></div>
+            <ul class="check-list">
+              <li><i class="fa-solid fa-circle-check"></i> Up to 10 root domains</li>
+              <li><i class="fa-solid fa-circle-check"></i> Daily scans</li>
+              <li><i class="fa-solid fa-circle-check"></i> AI-powered prioritization</li>
+              <li><i class="fa-solid fa-circle-check"></i> Role-based access (5 seats)</li>
+              <li><i class="fa-solid fa-circle-check"></i> Email &amp; Slack alerts</li>
+            </ul>
+            <a class="btn btn-primary btn-block" href="{{ url_for('auth.register') }}">Start free trial</a>
+          </div>
+          <div class="card plan reveal">
+            <h3>Enterprise</h3>
+            <p class="plan-desc">For organizations with complex, distributed footprints.</p>
+            <div class="price"><span>Custom</span></div>
+            <ul class="check-list">
+              <li><i class="fa-solid fa-circle-check"></i> Unlimited domains &amp; assets</li>
+              <li><i class="fa-solid fa-circle-check"></i> Continuous scanning</li>
+              <li><i class="fa-solid fa-circle-check"></i> SSO / SAML &amp; audit exports</li>
+              <li><i class="fa-solid fa-circle-check"></i> Dedicated support &amp; SLA</li>
+              <li><i class="fa-solid fa-circle-check"></i> Custom integrations</li>
+            </ul>
+            <a class="btn btn-ghost btn-block" href="{{ url_for('contact') }}">Contact sales</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= FAQ ========================= -->
+    <section class="section" id="faq">
+      <div class="wrap" style="max-width:760px;">
+        <div class="section-head reveal" style="margin:0 auto 32px;">
+          <p class="eyebrow">FAQ</p>
+          <h2>Frequently asked questions</h2>
+        </div>
+        <div class="reveal">
+          <div class="faq-item js-faq-item">
+            <button class="faq-q" aria-expanded="false">Do I need to install any agents?<i class="fa-solid fa-plus"></i></button>
+            <div class="faq-a"><div class="faq-a-inner">No. SentinelASM scans entirely from the outside, the same way an attacker would — nothing to install on your infrastructure.</div></div>
+          </div>
+          <div class="faq-item js-faq-item">
+            <button class="faq-q" aria-expanded="false">How often are assets rescanned?<i class="fa-solid fa-plus"></i></button>
+            <div class="faq-a"><div class="faq-a-inner">Free plans scan weekly, Pro plans scan daily, and Enterprise plans can be configured for continuous scanning.</div></div>
+          </div>
+          <div class="faq-item js-faq-item">
+            <button class="faq-q" aria-expanded="false">Can I invite my team?<i class="fa-solid fa-plus"></i></button>
+            <div class="faq-a"><div class="faq-a-inner">Yes. Pro and Enterprise plans include role-based access with admin, analyst and viewer roles, plus a full audit log.</div></div>
+          </div>
+          <div class="faq-item js-faq-item">
+            <button class="faq-q" aria-expanded="false">Is my scan data secure?<i class="fa-solid fa-plus"></i></button>
+            <div class="faq-a"><div class="faq-a-inner">Yes — see our <a href="{{ url_for('security_policy') }}" style="color:var(--info)">Security Policy</a> for details on encryption, access controls and data handling.</div></div>
+          </div>
+          <div class="faq-item js-faq-item">
+            <button class="faq-q" aria-expanded="false">Can I cancel anytime?<i class="fa-solid fa-plus"></i></button>
+            <div class="faq-a"><div class="faq-a-inner">Yes, monthly plans can be cancelled anytime from your account settings — no long-term contract required.</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= CONTACT ========================= -->
+    <section class="section" id="contact">
+      <div class="wrap contact-grid">
+        <div class="reveal">
+          <p class="eyebrow">Contact Us</p>
+          <h2>Talk to our team</h2>
+          <p class="lead" style="margin-top:14px;">Questions about pricing, a live demo, or an enterprise rollout — we're glad to help.</p>
+          <div class="contact-info-item"><i class="fa-solid fa-headset"></i><div><a href="mailto:Sentinelasmm@gmail.com" style="color:var(--text)">Sentinelasmm@gmail.com</a><br><span style="color:var(--muted); font-size:0.85rem;">General support</span></div></div>
+          <div class="contact-info-item"><i class="fa-solid fa-briefcase"></i><div><a href="mailto:Sentinelasmm@gmail.com" style="color:var(--text)">Sentinelasmm@gmail.com</a><br><span style="color:var(--muted); font-size:0.85rem;">Sales &amp; business inquiries</span></div></div>
+          <div class="contact-info-item"><i class="fa-solid fa-shield-halved"></i><div><a href="mailto:Sentinelasmm@gmail.com" style="color:var(--text)">Sentinelasmm@gmail.com</a><br><span style="color:var(--muted); font-size:0.85rem;">Security disclosure</span></div></div>
+          <div class="contact-info-item"><i class="fa-solid fa-clock"></i><div>Mon–Fri, 9:00 AM–6:00 PM (IST)<br><span style="color:var(--muted); font-size:0.85rem;">Response within 24 business hours</span></div></div>
+        </div>
+        <form class="card reveal js-frontend-form" aria-label="Contact form">
+          <div class="form-row">
+            <div class="form-group"><label for="cf-name">Full name</label><input id="cf-name" type="text" required autocomplete="name"></div>
+            <div class="form-group"><label for="cf-email">Work email</label><input id="cf-email" type="email" required autocomplete="email"></div>
+          </div>
+          <div class="form-group" style="margin-bottom:16px;"><label for="cf-company">Company</label><input id="cf-company" type="text" autocomplete="organization"></div>
+          <div class="form-group" style="margin-bottom:20px;"><label for="cf-message">How can we help?</label><textarea id="cf-message" rows="4" required></textarea></div>
+          <button class="btn btn-primary btn-block" type="submit">Send message</button>
+          <p class="js-form-note" role="status" style="margin:14px 0 0; font-size:0.85rem; color:var(--accent);" hidden></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- ========================= NEWSLETTER ========================= -->
+  <section class="newsletter-band">
+    <div class="wrap">
+      <h2 style="font-size:1.6rem;">Stay Updated with SentinelASM</h2>
+      <p style="color:var(--muted); margin-top:10px; max-width:520px; margin-left:auto; margin-right:auto;">Receive product updates, cybersecurity research, security advisories, feature releases and enterprise security insights.</p>
+      <form class="newsletter-form js-frontend-form" aria-label="Newsletter signup">
+        <label class="visually-hidden" for="nl-email" style="position:absolute; left:-9999px;">Email address</label>
+        <input id="nl-email" type="email" placeholder="you@company.com" required>
+        <button class="btn btn-primary" type="submit">Subscribe</button>
+      </form>
+      <p class="js-form-note" role="status" style="margin-top:12px; font-size:0.85rem; color:var(--accent);" hidden></p>
+    </div>
+  </section>
+
+  {% include 'components/public_footer.html' %}
+
+  <script src="{{ url_for('static', filename='js/landing.js') }}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

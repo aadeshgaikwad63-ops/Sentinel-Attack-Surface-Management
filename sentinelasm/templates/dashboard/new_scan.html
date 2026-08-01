@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% set active_page = 'new_scan' %}
+{% block title %}New Scan{% endblock %}
+
+{% block content %}
+<div class="mb-4 reveal">
+  <h3 class="font-display fw-bold text-white mb-1">Run a New Scan</h3>
+  <p class="section-sub mb-0">Discover DNS records, open ports, SSL posture, and technologies for any domain.</p>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card-glass card-pad reveal">
+      <label class="form-label-dark d-block mb-2">Target domain</label>
+      <div class="input-group mb-3">
+        <span class="input-group-text" style="background:var(--bg-elevated); border:1px solid var(--border-strong); border-right:none; color:var(--text-muted);"><i class="fa-solid fa-globe"></i></span>
+        <input type="text" id="scanTarget" class="form-control form-control-dark" style="border-left:none;" placeholder="example.com" value="acme.com">
+      </div>
+
+      <label class="form-label-dark d-block mb-2">Scan modules</label>
+      <div class="row g-2 mb-4">
+        {% set modules = [
+          ('DNS Lookup','fa-network-wired', true),
+          ('WHOIS','fa-address-card', true),
+          ('SSL Analysis','fa-lock', true),
+          ('Reverse DNS','fa-arrows-turn-to-dots', false),
+          ('Port Scan (Nmap)','fa-ethernet', true),
+          ('Technology Detection','fa-microchip', true),
+          ('Subdomain Enum','fa-sitemap', true),
+        ] %}
+        {% for label, icon, checked in modules %}
+        <div class="col-md-6">
+          <label class="d-flex align-items-center gap-2 p-2 px-3" style="background:var(--bg-elevated); border:1px solid var(--border); border-radius:10px; cursor:pointer;">
+            <input class="form-check-input m-0" type="checkbox" {{ 'checked' if checked }}>
+            <i class="fa-solid {{ icon }}" style="width:16px; color:var(--green);"></i>
+            <span class="small">{{ label }}</span>
+          </label>
+        </div>
+        {% endfor %}
+      </div>
+
+      <button class="btn btn-sentinel w-100 py-2" id="startScanBtn">
+        <i class="fa-solid fa-satellite-dish me-2"></i>Start Scan
+      </button>
+    </div>
+
+    <div class="card-glass card-pad mt-3 reveal" id="progressCard" style="display:none;">
+      <div class="section-title mb-3">Live Progress</div>
+      <div class="d-flex flex-column gap-3" id="progressList">
+        {% set steps = ['Resolving DNS records','Querying WHOIS registry','Analyzing SSL/TLS certificate','Enumerating subdomains','Scanning ports (Nmap)','Fingerprinting technologies'] %}
+        {% for step in steps %}
+        <div class="d-flex align-items-center gap-3 progress-step" data-idx="{{ loop.index0 }}">
+          <div class="step-icon" style="width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:var(--bg-elevated); border:1px solid var(--border-strong); flex-shrink:0;">
+            <i class="fa-solid fa-circle-notch" style="font-size:11px; color:var(--text-muted);"></i>
+          </div>
+          <div class="flex-grow-1">
+            <div class="small fw-semibold">{{ step }}</div>
+          </div>
+          <span class="small step-status" style="color:var(--text-muted);">Pending</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card-glass card-pad h-100 d-flex flex-column align-items-center justify-content-center text-center reveal">
+      <div class="radar mb-4" id="radarLoader">
+        <div class="blip" style="top:35%; left:60%;"></div>
+        <div class="blip" style="top:55%; left:30%; animation-delay:.5s;"></div>
+        <div class="blip" style="top:70%; left:65%; animation-delay:1s;"></div>
+      </div>
+      <div id="radarLabel" class="section-title mb-1">Ready to scan</div>
+      <p class="section-sub mb-0" id="radarSub">Configure modules and press start — SentinelASM will sweep the target for exposed surface.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('startScanBtn').addEventListener('click', function(){
+  const btn = this;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Scanning ' + document.getElementById('scanTarget').value + '…';
+
+  document.getElementById('radarLabel').textContent = 'Scan in progress';
+  document.getElementById('radarSub').textContent = 'Sweeping ' + document.getElementById('scanTarget').value + ' for open ports, DNS records, and exposed services.';
+
+  const card = document.getElementById('progressCard');
+  card.style.display = 'block';
+  const steps = document.querySelectorAll('.progress-step');
+  let i = 0;
+
+  function runStep(){
+    if (i > 0){
+      const prev = steps[i-1];
+      prev.querySelector('.step-icon i').className = 'fa-solid fa-check';
+      prev.querySelector('.step-icon i').style.color = 'var(--green)';
+      prev.querySelector('.step-icon').style.borderColor = 'var(--green)';
+      prev.querySelector('.step-status').textContent = 'Done';
+      prev.querySelector('.step-status').style.color = 'var(--green)';
+    }
+    if (i < steps.length){
+      const cur = steps[i];
+      cur.querySelector('.step-icon i').className = 'fa-solid fa-spinner fa-spin';
+      cur.querySelector('.step-icon i').style.color = 'var(--blue)';
+      cur.querySelector('.step-status').textContent = 'Running…';
+      cur.querySelector('.step-status').style.color = 'var(--blue)';
+      i++;
+      setTimeout(runStep, 900);
+    } else {
+      btn.innerHTML = '<i class="fa-solid fa-circle-check me-2"></i>Scan Complete';
+      document.getElementById('radarLabel').textContent = 'Scan complete';
+      document.getElementById('radarSub').innerHTML = 'Results are ready. <a href="{{ url_for("scan_results") }}">View full results →</a>';
+    }
+  }
+  runStep();
+});
+</script>
+{% endblock %}

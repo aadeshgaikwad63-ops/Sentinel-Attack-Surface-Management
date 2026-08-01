@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% set active_page = 'ai_assistant' %}
+{% block title %}AI Assistant{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+  <div class="col-lg-3 d-none d-lg-block">
+    <div class="card-glass card-pad reveal">
+      <div class="section-title mb-3">Chat History</div>
+      <div class="d-flex flex-column gap-1">
+        {% for item in history %}
+        <a href="#" class="nav-link {{ 'active' if loop.last }}"><i class="fa-solid fa-message"></i><span class="small">{{ item.user_message[:40] }}</span></a>
+        {% else %}
+        <span class="small text-muted-2">No previous conversations yet.</span>
+        {% endfor %}
+      </div>
+      <button class="btn btn-ghost w-100 mt-3 btn-sm"><i class="fa-solid fa-plus me-2"></i>New Chat</button>
+    </div>
+  </div>
+
+  <div class="col-lg-9">
+    <div class="card-glass card-pad chat-shell reveal">
+      <div class="d-flex align-items-center gap-2 mb-3 pb-3" style="border-bottom:1px solid var(--border);">
+        <div class="msg-avatar" style="background:var(--green-glow); color:var(--green);"><i class="fa-solid fa-robot"></i></div>
+        <div>
+          <div class="fw-bold text-white small">Sentinel AI</div>
+          <div class="small text-muted-2"><span style="color:var(--green)">●</span> Online — trained on your latest scan data</div>
+        </div>
+      </div>
+
+      <div class="chat-scroll" id="chatScroll">
+        {% for item in history %}
+        <div class="msg-row me">
+          <div class="msg-avatar" style="background:var(--blue-glow); color:var(--blue);"><i class="fa-solid fa-user"></i></div>
+          <div class="msg-bubble">{{ item.user_message }}</div>
+        </div>
+        <div class="msg-row ai">
+          <div class="msg-avatar" style="background:var(--accent-glow); color:var(--accent);"><i class="fa-solid fa-robot"></i></div>
+          <div class="msg-bubble">{{ item.ai_response | sentinel_markdown }}</div>
+        </div>
+        {% else %}
+        <div class="msg-row ai">
+          <div class="msg-avatar" style="background:var(--accent-glow); color:var(--accent);"><i class="fa-solid fa-robot"></i></div>
+          <div class="msg-bubble">Hi {{ current_user.full_name or current_user.username }} 👋 I'm Sentinel AI. Ask me about a vulnerability class (SQL injection, XSS, SSRF…), general security best practices, or run a scan and I'll walk you through your specific findings.</div>
+        </div>
+        {% endfor %}
+        <div class="msg-row ai" id="typingIndicator" style="display:none;">
+          <div class="msg-avatar" style="background:var(--accent-glow); color:var(--accent);"><i class="fa-solid fa-robot"></i></div>
+          <div class="msg-bubble typing-dots"><span></span><span></span><span></span></div>
+        </div>
+      </div>
+
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        <button class="suggest-chip" onclick="sentinelAsk(this)">Give me a remediation checklist</button>
+        <button class="suggest-chip" onclick="sentinelAsk(this)">Summarize this week's risk trend</button>
+        <button class="suggest-chip" onclick="sentinelAsk(this)">Which asset needs attention first?</button>
+      </div>
+
+      <form class="d-flex gap-2" id="chatForm">
+        <input type="text" id="chatInput" class="form-control form-control-dark" placeholder="Ask about a vulnerability, asset, or risk trend…">
+        <button type="submit" class="btn btn-sentinel px-4"><i class="fa-solid fa-paper-plane"></i></button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function scrollChat(){ const s = document.getElementById('chatScroll'); s.scrollTop = s.scrollHeight; }
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function renderSentinelMarkdown(text){
+  let html = escapeHtml(text);
+  html = html.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+  html = html.replace(/\n/g, '<br>');
+  return html;
+}
+
+function appendMsg(text, who){
+  const s = document.getElementById('chatScroll');
+  const row = document.createElement('div');
+  row.className = 'msg-row ' + who;
+  row.innerHTML = who === 'me'
+    ? `<div class="msg-avatar" style="background:var(--blue-glow); color:var(--blue);"><i class="fa-solid fa-user"></i></div><div class="msg-bubble"></div>`
+    : `<div class="msg-avatar" style="background:var(--accent-glow); color:var(--accent);"><i class="fa-solid fa-robot"></i></div><div class="msg-bubble"></div>`;
+  const bubble = row.querySelector('.msg-bubble');
+  if (who === 'me') {
+    bubble.textContent = text;
+  } else {
+    bubble.innerHTML = renderSentinelMarkdown(text);
+  }
+  s.insertBefore(row, document.getElementById('typingIndicator'));
+  scrollChat();
+}
+
+function sentinelAsk(el){
+  const msg = el.textContent;
+  appendMsg(msg, 'me');
+  sendToAssistant(msg);
+}
+
+function showTyping(){
+  const t = document.getElementById('typingIndicator');
+  t.style.display = 'flex';
+  scrollChat();
+}
+
+function hideTyping(){
+  document.getElementById('typingIndicator').style.display = 'none';
+}
+
+async function sendToAssistant(message){
+  showTyping();
+  try {
+    const res = await fetch("{{ url_for('ai.chat') }}", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message })
+    });
+    const data = await res.json();
+    hideTyping();
+    appendMsg(data.reply || "Sorry, I couldn't process that.", 'ai');
+  } catch (err) {
+    hideTyping();
+    appendMsg("I couldn't reach the assistant service. Please try again.", 'ai');
+  }
+}
+
+document.getElementById('chatForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const input = document.getElementById('chatInput');
+  if (!input.value.trim()) return;
+  const msg = input.value;
+  appendMsg(msg, 'me');
+  input.value = '';
+  sendToAssistant(msg);
+});
+</script>
+{% endblock %}

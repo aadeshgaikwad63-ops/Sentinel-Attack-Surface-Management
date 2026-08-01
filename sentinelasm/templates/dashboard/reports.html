@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% set active_page = 'reports' %}
+{% block title %}Reports{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4 reveal">
+  <div>
+    <h3 class="font-display fw-bold text-white mb-1">Executive Report</h3>
+    <p class="section-sub mb-0">Organization-wide posture summary · Generated Jul 28, 2026</p>
+  </div>
+  <div class="d-flex gap-2">
+    <button class="btn btn-ghost"><i class="fa-solid fa-file-csv me-2"></i>Export CSV</button>
+    <button class="btn btn-sentinel"><i class="fa-solid fa-file-pdf me-2"></i>Export PDF</button>
+  </div>
+</div>
+
+<div class="card-glass card-pad mb-3 reveal">
+  <div class="section-title mb-2">Executive Summary</div>
+  <p class="small mb-0" style="line-height:1.8;">
+    Across 48 monitored assets, SentinelASM's risk engine recorded an average security score of
+    <b class="mono">82/100</b>, a 4-point improvement over the last 14 days. Seven critical
+    vulnerabilities remain unresolved, concentrated on two internet-facing subdomains. The most
+    urgent action item is patching the xz-utils backdoor (CVE-2024-3094) on <span class="mono">api.acme.com</span>,
+    followed by closing the unexpected port exposure on the same host.
+  </p>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-3 col-6"><div class="card-glass card-pad reveal"><div class="stat-label">Avg. Security Score</div><div class="stat-value">82</div></div></div>
+  <div class="col-md-3 col-6"><div class="card-glass card-pad reveal" style="animation-delay:40ms"><div class="stat-label" style="color:var(--red)">Avg. Risk Score</div><div class="stat-value" style="color:var(--red)">64</div></div></div>
+  <div class="col-md-3 col-6"><div class="card-glass card-pad reveal" style="animation-delay:80ms"><div class="stat-label">Scans This Month</div><div class="stat-value">126</div></div></div>
+  <div class="col-md-3 col-6"><div class="card-glass card-pad reveal" style="animation-delay:120ms"><div class="stat-label">CVEs Remediated</div><div class="stat-value" style="color:var(--green)">31</div></div></div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-lg-7">
+    <div class="card-glass card-pad h-100 reveal">
+      <div class="section-title mb-2">Score Trend — 30 Days</div>
+      <canvas id="reportTrendChart" height="200"></canvas>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card-glass card-pad h-100 reveal">
+      <div class="section-title mb-2">Findings by Severity</div>
+      <canvas id="reportSeverityChart" height="200"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="card-glass card-pad reveal">
+  <div class="section-title mb-3"><i class="fa-solid fa-lightbulb me-2" style="color:var(--green)"></i>Recommendations</div>
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="p-3" style="background:var(--bg-elevated); border-radius:12px; border:1px solid var(--border);">
+        <span class="badge-soft badge-critical mb-2 d-inline-block">Priority 1</span>
+        <div class="fw-semibold small mb-1 text-white">Patch xz-utils backdoor</div>
+        <div class="small text-secondary">Affects api.acme.com · CVE-2024-3094</div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="p-3" style="background:var(--bg-elevated); border-radius:12px; border:1px solid var(--border);">
+        <span class="badge-soft badge-high mb-2 d-inline-block">Priority 2</span>
+        <div class="fw-semibold small mb-1 text-white">Close unexpected port 8080</div>
+        <div class="small text-secondary">Affects api.acme.com</div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="p-3" style="background:var(--bg-elevated); border-radius:12px; border:1px solid var(--border);">
+        <span class="badge-soft badge-medium mb-2 d-inline-block">Priority 3</span>
+        <div class="fw-semibold small mb-1 text-white">Renew expiring SSL certificate</div>
+        <div class="small text-secondary">Affects vpn.acme.com · 9 days remaining</div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="p-3" style="background:var(--bg-elevated); border-radius:12px; border:1px solid var(--border);">
+        <span class="badge-soft badge-low mb-2 d-inline-block">Priority 4</span>
+        <div class="fw-semibold small mb-1 text-white">Upgrade outdated jQuery dependency</div>
+        <div class="small text-secondary">Affects acme.com</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const ctx = document.getElementById('reportTrendChart');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: Array.from({length:10}, (_,i)=>'Wk '+(i+1)),
+      datasets: [{
+        label: 'Security Score', data: [61,64,66,68,71,73,76,78,80,82],
+        borderColor: SENTINEL_PALETTE.green, backgroundColor: sentinelGradient(ctx.getContext('2d'), SENTINEL_PALETTE.green),
+        fill: true, tension: .4, pointRadius: 0, borderWidth: 2.5
+      }]
+    },
+    options: { scales: { x:{grid:{color:SENTINEL_PALETTE.grid}}, y:{grid:{color:SENTINEL_PALETTE.grid}, min:0, max:100 } }, plugins:{legend:{display:false}} }
+  });
+
+  new Chart(document.getElementById('reportSeverityChart'), {
+    type: 'polarArea',
+    data: {
+      labels: ['Critical','High','Medium','Low'],
+      datasets: [{ data: [7,14,22,41], backgroundColor: [SENTINEL_PALETTE.red+'cc', SENTINEL_PALETTE.amber+'cc', SENTINEL_PALETTE.blue+'cc', SENTINEL_PALETTE.green+'cc'], borderWidth:0 }]
+    },
+    options: { scales: { r: { grid:{color:SENTINEL_PALETTE.grid}, ticks:{display:false} } }, plugins:{legend:{position:'bottom'}} }
+  });
+});
+</script>
+{% endblock %}

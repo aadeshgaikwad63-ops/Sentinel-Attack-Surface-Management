@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% set active_page = 'settings' %}
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+<div class="mb-4 reveal">
+  <h3 class="font-display fw-bold text-white mb-1">Settings</h3>
+  <p class="section-sub mb-0">Configure workspace preferences, integrations, and security.</p>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-3">
+    <div class="card-glass card-pad reveal" style="position:sticky; top:84px;">
+      <div class="nav flex-column gap-1" id="settingsTabs" role="tablist">
+        <button class="nav-link active text-start" data-bs-toggle="pill" data-bs-target="#tab-theme"><i class="fa-solid fa-palette"></i><span>Theme</span></button>
+        <button class="nav-link text-start" data-bs-toggle="pill" data-bs-target="#tab-notifications"><i class="fa-solid fa-bell"></i><span>Notifications</span></button>
+        <button class="nav-link text-start" data-bs-toggle="pill" data-bs-target="#tab-api"><i class="fa-solid fa-plug"></i><span>API</span></button>
+        <button class="nav-link text-start" data-bs-toggle="pill" data-bs-target="#tab-security"><i class="fa-solid fa-shield-halved"></i><span>Security</span></button>
+        <button class="nav-link text-start" data-bs-toggle="pill" data-bs-target="#tab-smtp"><i class="fa-solid fa-envelope"></i><span>SMTP</span></button>
+        {% if current_user.is_admin %}
+        <a class="nav-link text-start" href="{{ url_for('settings.audit_logs') }}"><i class="fa-solid fa-clipboard-list"></i><span>Audit Logs</span></a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-9">
+    <div class="tab-content">
+
+      <div class="tab-pane fade show active" id="tab-theme">
+        <div class="card-glass card-pad reveal">
+          <div class="section-title mb-3">Theme</div>
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <div class="theme-swatch p-3 text-center {{ 'theme-swatch-active' if current_theme == 'dark' }}" data-theme-choice="dark" style="border-radius:12px; cursor:pointer;">
+                <div class="mb-2" style="height:50px; background:linear-gradient(135deg,#0B1220,#1F2937); border-radius:8px;"></div>
+                <div class="small fw-semibold">Dark</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="theme-swatch p-3 text-center {{ 'theme-swatch-active' if current_theme == 'light' }}" data-theme-choice="light" style="border-radius:12px; cursor:pointer;">
+                <div class="mb-2" style="height:50px; background:linear-gradient(135deg,#F1F5F9,#E2E8F0); border-radius:8px;"></div>
+                <div class="small fw-semibold text-secondary">Light</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="theme-swatch p-3 text-center {{ 'theme-swatch-active' if current_theme == 'system' }}" data-theme-choice="system" style="border-radius:12px; cursor:pointer;">
+                <div class="mb-2" style="height:50px; background:linear-gradient(135deg,#0B1220,#111827); border-radius:8px;"></div>
+                <div class="small fw-semibold text-secondary">System</div>
+              </div>
+            </div>
+          </div>
+          <label class="form-label-dark d-block">Accent color</label>
+          <div class="d-flex gap-2">
+            <span class="accent-swatch {{ 'accent-swatch-active' if current_accent == 'green' }}" data-accent-choice="green" style="width:28px; height:28px; border-radius:8px; background:var(--green);"></span>
+            <span class="accent-swatch {{ 'accent-swatch-active' if current_accent == 'blue' }}" data-accent-choice="blue" style="width:28px; height:28px; border-radius:8px; background:var(--blue);"></span>
+            <span class="accent-swatch {{ 'accent-swatch-active' if current_accent == 'purple' }}" data-accent-choice="purple" style="width:28px; height:28px; border-radius:8px; background:var(--purple);"></span>
+            <span class="accent-swatch {{ 'accent-swatch-active' if current_accent == 'orange' }}" data-accent-choice="orange" style="width:28px; height:28px; border-radius:8px; background:var(--orange);"></span>
+          </div>
+          <p class="small text-muted-2 mt-3 mb-0">Changes apply instantly and are saved to your account automatically.</p>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="tab-notifications">
+        <div class="card-glass card-pad reveal">
+          <div class="section-title mb-3">Notifications</div>
+          <form method="POST" action="{{ url_for('settings.update_notifications') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          {% for label, sub, checked, key in notification_prefs %}
+          <div class="d-flex justify-content-between align-items-center py-3" style="border-bottom:1px solid var(--border);">
+            <div><div class="small fw-semibold text-white">{{ label }}</div><div class="small text-muted-2">{{ sub }}</div></div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="{{ key }}" style="width:40px; height:22px;" {{ 'checked' if checked }}>
+            </div>
+          </div>
+          {% endfor %}
+          <button type="submit" class="btn btn-sentinel mt-3"><i class="fa-solid fa-floppy-disk me-2"></i>Save Preferences</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="tab-api">
+        <div class="card-glass card-pad reveal">
+          <div class="section-title mb-3">API Configuration</div>
+          <label class="form-label-dark d-block">Base API URL</label>
+          <input type="text" class="form-control form-control-dark mb-3" value="https://api.sentinelasm.io/v1">
+          <label class="form-label-dark d-block">Webhook endpoint</label>
+          <input type="text" class="form-control form-control-dark mb-3" placeholder="https://yourapp.com/webhooks/sentinel">
+          <label class="form-label-dark d-block">Rate limit</label>
+          <select class="form-select form-select-dark"><option>60 requests / min</option><option>120 requests / min</option><option>Unlimited (Enterprise)</option></select>
+          <button class="btn btn-sentinel mt-3"><i class="fa-solid fa-floppy-disk me-2"></i>Save API Settings</button>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="tab-security">
+        <div class="card-glass card-pad reveal">
+          <div class="section-title mb-3">Security</div>
+          <div class="d-flex justify-content-between align-items-center py-3" style="border-bottom:1px solid var(--border);">
+            <div><div class="small fw-semibold text-white">Two-factor authentication</div><div class="small text-muted-2">Require a code at sign-in</div></div>
+            <div class="form-check form-switch"><input class="form-check-input" type="checkbox" checked style="width:40px; height:22px;"></div>
+          </div>
+          <div class="d-flex justify-content-between align-items-center py-3" style="border-bottom:1px solid var(--border);">
+            <div><div class="small fw-semibold text-white">Enforce SSO for all members</div><div class="small text-muted-2">Require organization SSO login</div></div>
+            <div class="form-check form-switch"><input class="form-check-input" type="checkbox" style="width:40px; height:22px;"></div>
+          </div>
+          <div class="py-3">
+            <label class="form-label-dark d-block">Session timeout</label>
+            <select class="form-select form-select-dark" style="max-width:260px;"><option>30 minutes</option><option selected>4 hours</option><option>24 hours</option></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="tab-smtp">
+        <div class="card-glass card-pad reveal">
+          <div class="section-title mb-3">SMTP Configuration</div>
+          {% if not current_user.is_admin %}
+          <p class="small text-muted-2">Only administrators can view or change SMTP configuration.</p>
+          {% else %}
+          <form method="POST" action="{{ url_for('settings.update_smtp') }}" id="smtpForm">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="row g-3">
+              <div class="col-md-8"><label class="form-label-dark d-block">SMTP host</label><input type="text" name="smtp_host" class="form-control form-control-dark" placeholder="smtp.sendgrid.net" value="{{ smtp_config.host }}"></div>
+              <div class="col-md-4"><label class="form-label-dark d-block">Port</label><input type="text" name="smtp_port" class="form-control form-control-dark" value="{{ smtp_config.port }}"></div>
+              <div class="col-md-6"><label class="form-label-dark d-block">Username</label><input type="text" name="smtp_username" class="form-control form-control-dark" value="{{ smtp_config.username }}"></div>
+              <div class="col-md-6"><label class="form-label-dark d-block">Password</label><input type="password" name="smtp_password" class="form-control form-control-dark" placeholder="{{ 'Leave blank to keep existing password' if smtp_config.configured else '' }}"></div>
+              <div class="col-md-8"><label class="form-label-dark d-block">From address</label><input type="email" name="smtp_sender" class="form-control form-control-dark" placeholder="alerts@yourcompany.com" value="{{ smtp_config.sender }}"></div>
+            </div>
+            <div class="form-check mt-3">
+              <input class="form-check-input" type="checkbox" name="smtp_use_tls" {{ 'checked' if smtp_config.use_tls }}>
+              <label class="form-check-label small text-secondary">Use TLS encryption</label>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button type="submit" class="btn btn-sentinel"><i class="fa-solid fa-floppy-disk me-2"></i>Save SMTP Settings</button>
+              <button type="button" class="btn btn-ghost" id="sendTestEmailBtn"><i class="fa-solid fa-paper-plane me-2"></i>Send Test Email</button>
+            </div>
+            <div id="smtpTestResult" class="small mt-2"></div>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  #settingsTabs .nav-link{ display:flex; align-items:center; gap:10px; }
+  #settingsTabs .nav-link i{ width:16px; }
+  .theme-swatch{ background:var(--bg-elevated); border:1px solid var(--border-strong); transition:border-color .15s var(--ease); }
+  .theme-swatch:hover{ border-color: var(--accent); }
+  .theme-swatch-active{ border:2px solid var(--accent) !important; }
+  .accent-swatch{ display:inline-block; border:2px solid transparent; transition:border-color .15s var(--ease), transform .15s var(--ease); }
+  .accent-swatch:hover{ transform: scale(1.08); }
+  .accent-swatch-active{ border-color:#fff !important; }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var btn = document.getElementById('sendTestEmailBtn');
+  if (!btn) return;
+  var resultEl = document.getElementById('smtpTestResult');
+  var form = document.getElementById('smtpForm');
+
+  btn.addEventListener('click', function () {
+    btn.disabled = true;
+    var originalHtml = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Sending…';
+    resultEl.textContent = '';
+
+    var formData = new FormData(form);
+    formData.append('test_email', '{{ current_user.email }}');
+
+    fetch("{{ url_for('settings.test_smtp') }}", {
+      method: 'POST',
+      headers: { 'X-CSRFToken': formData.get('csrf_token') },
+      body: formData
+    })
+      .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+      .then(function (result) {
+        resultEl.textContent = result.data.message;
+        resultEl.style.color = result.ok ? 'var(--green)' : 'var(--red)';
+      })
+      .catch(function () {
+        resultEl.textContent = 'Could not reach the server to send the test email.';
+        resultEl.style.color = 'var(--red)';
+      })
+      .finally(function () {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+      });
+  });
+});
+</script>
+{% endblock %}

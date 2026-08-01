@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      FLASK_ENV: production
+      SECRET_KEY: ${SECRET_KEY:-change-this-to-a-long-random-secret-key}
+      DATABASE_URL: postgresql+psycopg2://sentinel_user:sentinel_pass@db:5432/sentinelasm
+      RATELIMIT_STORAGE_URI: memory://
+      LOG_LEVEL: INFO
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./logs:/app/logs
+      - ./reports:/app/reports
+    restart: unless-stopped
+    cap_add:
+      # Nmap SYN scans need raw socket access inside the container.
+      - NET_RAW
+      - NET_ADMIN
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: sentinel_user
+      POSTGRES_PASSWORD: sentinel_pass
+      POSTGRES_DB: sentinelasm
+    volumes:
+      - sentinel_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentinel_user -d sentinelasm"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  sentinel_pgdata:

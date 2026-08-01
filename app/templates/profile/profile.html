@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}My Profile - SentinelASM{% endblock %}
+{% block content %}
+    <h1>{{ current_user.full_name or current_user.username }}</h1>
+    <div class="subtitle">{{ current_user.email }} &middot; role: {{ current_user.role.name }}</div>
+
+    {% if current_user.bio %}
+        <p style="color: var(--muted); font-size: 0.9rem;">{{ current_user.bio }}</p>
+    {% endif %}
+
+    <div style="display:flex; gap:8px; margin: 16px 0;">
+        <a class="btn secondary" style="text-align:center; text-decoration:none;" href="{{ url_for('profile.edit_profile') }}">Edit Profile</a>
+        <a class="btn secondary" style="text-align:center; text-decoration:none;" href="{{ url_for('profile.change_password') }}">Change Password</a>
+    </div>
+
+    <h2 style="font-size: 1rem; margin-top: 24px;">API Access Tokens</h2>
+    <table>
+        <thead>
+            <tr><th>Name</th><th>Preview</th><th>Created</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% for token in tokens %}
+            <tr>
+                <td>{{ token.name }}</td>
+                <td>{{ token.token_preview }}...</td>
+                <td>{{ token.created_at.strftime('%Y-%m-%d') }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('profile.revoke_token', token_id=token.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="secondary" style="width:auto; padding:4px 10px; font-size:0.75rem;">Revoke</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4" style="color: var(--muted);">No active tokens.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <form method="POST" action="{{ url_for('profile.create_token') }}" style="margin-top: 16px; display:flex; gap:8px;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="text" name="name" placeholder="Token name (e.g. CI pipeline)" style="margin-bottom:0;">
+        <button type="submit" style="width:auto; white-space:nowrap;">Generate Token</button>
+    </form>
+{% endblock %}

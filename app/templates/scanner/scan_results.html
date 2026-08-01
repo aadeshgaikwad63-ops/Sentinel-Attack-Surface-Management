@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+{% set active_page = 'scan_results' %}
+{% block title %}Scan Results{% endblock %}
+
+{% block content %}
+<div class="mb-2 reveal">
+  <a href="{{ url_for('assets.assets') }}" class="small text-secondary"><i class="fa-solid fa-arrow-left me-1"></i>Back to Assets</a>
+</div>
+
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4 reveal">
+  <div>
+    <div class="d-flex align-items-center gap-2">
+      <h3 class="font-display fw-bold text-white mb-1 mono" id="targetName">Loading…</h3>
+      <button class="icon-btn" id="copyTargetBtn" style="width:32px; height:32px; border-radius:8px;" data-bs-toggle="tooltip" title="Copy target">
+        <i class="fa-regular fa-copy" style="font-size:12px;"></i>
+      </button>
+    </div>
+    <p class="section-sub mb-0" id="scanSummary">Loading…</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('scanner.new_scan') }}" class="btn btn-ghost"><i class="fa-solid fa-rotate me-2"></i>Rescan</a>
+    <a href="{{ url_for('reports.export_pdf') }}" class="btn btn-sentinel"><i class="fa-solid fa-file-arrow-down me-2"></i>Download PDF</a>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-4">
+    <div class="card-glass card-pad text-center reveal">
+      <div class="sweep-ring mx-auto mb-2">
+        <svg width="132" height="132" viewBox="0 0 132 132">
+          <circle class="track" cx="66" cy="66" r="56"></circle>
+          <circle class="progress" id="securityRing" cx="66" cy="66" r="56" style="stroke:var(--green)"></circle>
+        </svg>
+        <div class="core">
+          <span class="val" id="securityScore">0</span>
+          <span class="lbl">Security</span>
+        </div>
+      </div>
+      <div class="small text-muted-2">Overall security posture</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card-glass card-pad text-center reveal" style="animation-delay:40ms">
+      <div class="sweep-ring mx-auto mb-2">
+        <svg width="132" height="132" viewBox="0 0 132 132">
+          <circle class="track" cx="66" cy="66" r="56"></circle>
+          <circle class="progress" id="riskRing" cx="66" cy="66" r="56" style="stroke:var(--red)"></circle>
+        </svg>
+        <div class="core">
+          <span class="val" style="color:var(--red)" id="riskScore">0</span>
+          <span class="lbl">Risk</span>
+        </div>
+      </div>
+      <div class="small text-muted-2">Weighted risk from findings</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card-glass card-pad text-center reveal" style="animation-delay:80ms">
+      <div class="sweep-ring mx-auto mb-2">
+        <svg width="132" height="132" viewBox="0 0 132 132">
+          <circle class="track" cx="66" cy="66" r="56"></circle>
+          <circle class="progress" id="exposureRing" cx="66" cy="66" r="56" style="stroke:var(--amber)"></circle>
+        </svg>
+        <div class="core">
+          <span class="val" style="color:var(--amber)" id="exposureScore">0</span>
+          <span class="lbl">Exposure</span>
+        </div>
+      </div>
+      <div class="small text-muted-2">Public-facing surface area</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card-glass card-pad h-100 reveal">
+      <div class="section-title mb-3"><i class="fa-solid fa-network-wired me-2" style="color:var(--blue)"></i>DNS Records</div>
+      <table class="table table-sentinel">
+        <tbody id="dnsTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card-glass card-pad h-100 reveal">
+      <div class="section-title mb-3"><i class="fa-solid fa-address-card me-2" style="color:var(--purple)"></i>WHOIS</div>
+      <table class="table table-sentinel">
+        <tbody id="whoisTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card-glass card-pad h-100 reveal">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="section-title"><i class="fa-solid fa-lock me-2" style="color:var(--green)"></i>SSL Analysis</div>
+        <span class="badge-soft badge-medium" id="sslGrade">—</span>
+      </div>
+      <table class="table table-sentinel">
+        <tbody id="sslTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card-glass card-pad h-100 reveal">
+      <div class="section-title mb-3"><i class="fa-solid fa-microchip me-2" style="color:var(--blue)"></i>Technologies Detected</div>
+      <div class="d-flex flex-wrap gap-2" id="technologyList"></div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card-glass card-pad h-100 reveal">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="section-title"><i class="fa-solid fa-ethernet me-2" style="color:var(--amber)"></i>Open Ports</div>
+        <span class="small text-muted-2" id="openPortsCount"></span>
+      </div>
+      <table class="table-sentinel">
+        <thead><tr><th>Port</th><th>Service</th><th>State</th></tr></thead>
+        <tbody id="portsTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card-glass card-pad reveal">
+      <div class="section-title mb-3"><i class="fa-solid fa-lightbulb me-2" style="color:var(--green)"></i>Recommendations</div>
+      <ul id="recommendationsList" class="mb-0" style="font-size:13.75px; line-height:1.9;"></ul>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+const result = JSON.parse(sessionStorage.getItem("scanResult") || "null");
+
+if (!result) {
+  alert("No scan results found. Start a new scan to view results.");
+  window.location.href = "{{ url_for('scanner.new_scan') }}";
+  throw new Error("Scan result missing.");
+}
+
+if (!result.data || !result.ai_analysis) {
+  alert("Invalid scan result.");
+  throw new Error("Invalid scan result.");
+}
+
+const data = result.data;
+const ai = result.ai_analysis;
+
+document.getElementById("targetName").textContent = data.target;
+document.getElementById("scanSummary").textContent =
+  `Scan completed: ${data.scan_time} • ${data.metadata?.resolved_ip || "unknown host"}`;
+
+document.getElementById("copyTargetBtn")?.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(data.target);
+  } catch (e) { /* clipboard unavailable — silently ignore */ }
+});
+
+// --- WHOIS -----------------------------------------------------------
+const whois = data.whois || {};
+document.getElementById("whoisTable").innerHTML = `
+  <tr><td class="text-secondary">Registrar</td><td>${whois.registrar || "N/A"}</td></tr>
+  <tr><td class="text-secondary">Created</td><td class="mono">${whois.creation_date || "N/A"}</td></tr>
+  <tr><td class="text-secondary">Expires</td><td class="mono">${whois.expiration_date || "N/A"}</td></tr>
+  <tr><td class="text-secondary">Organization</td><td>${whois.organization || "N/A"}</td></tr>
+  <tr><td class="text-secondary">Country</td><td>${whois.country || "N/A"}</td></tr>
+  <tr><td class="text-secondary">Domain Age</td><td>${whois.domain_age_years ?? "N/A"} years</td></tr>
+`;
+
+// --- SSL ---------------------------------------------------------------
+const ssl = data.ssl || {};
+document.getElementById("sslTable").innerHTML = `
+  <tr><td class="text-secondary">Issuer</td><td>${ssl.issuer_common_name || "N/A"}</td></tr>
+  <tr><td class="text-secondary">Common Name</td><td>${ssl.common_name || "N/A"}</td></tr>
+  <tr><td class="text-secondary">TLS Version</td><td class="mono">${ssl.tls_version || "N/A"}</td></tr>
+  <tr><td class="text-secondary">Cipher Suite</td><td>${ssl.cipher_suite || "N/A"}</td></tr>
+  <tr><td class="text-secondary">Valid From</td><td class="mono">${ssl.valid_from || "N/A"}</td></tr>
+  <tr><td class="text-secondary">Valid Until</td><td class="mono">${ssl.valid_until || "N/A"}</td></tr>
+  <tr><td class="text-secondary">Days Remaining</td><td>${ssl.days_remaining ?? "N/A"}</td></tr>
+  <tr><td class="text-secondary">Self Signed</td><td>${ssl.self_signed ? "Yes" : "No"}</td></tr>
+  <tr><td class="text-secondary">Expired</td><td>${ssl.expired ? "Yes" : "No"}</td></tr>
+`;
+const grade = window.Sentinel.sslGrade(ssl);
+const gradeEl = document.getElementById("sslGrade");
+gradeEl.textContent = `Grade ${grade.grade}`;
+gradeEl.className = `badge-soft ${grade.cls}`;
+
+// --- Technologies --------------------------------------------------------
+const tech = data.technologies || {};
+const techChips = [];
+(tech.frameworks || []).forEach((f) => techChips.push({ label: f, cls: "badge-medium" }));
+if (tech.server) techChips.push({ label: tech.server, cls: "badge-low" });
+if (tech.powered_by) techChips.push({ label: tech.powered_by, cls: "badge-low" });
+if (tech.generator) techChips.push({ label: tech.generator, cls: "badge-medium" });
+
+const techListEl = document.getElementById("technologyList");
+techListEl.innerHTML = techChips.length
+  ? techChips.map((c) => `<span class="badge-soft ${c.cls}"><i class="${window.Sentinel.techIcon(c.label)} me-1"></i>${c.label}</span>`).join("")
+  : `<span class="badge-soft badge-low">No technologies detected</span>`;
+
+// --- DNS -----------------------------------------------------------------
+const dnsTable = document.getElementById("dnsTable");
+const dnsRecords = data.dns || {};
+const dnsRows = Object.keys(dnsRecords).map((record) => {
+  const values = dnsRecords[record] || [];
+  return `<tr><td class="text-secondary">${record}</td><td class="mono">${values.length ? values.join("<br>") : "-"}</td></tr>`;
+});
+dnsTable.innerHTML = dnsRows.length ? dnsRows.join("") : `<tr><td class="text-muted-2 text-center py-3">No DNS records resolved</td></tr>`;
+
+// --- Ports -----------------------------------------------------------------
+const portsTable = document.getElementById("portsTable");
+const ports = data.ports || [];
+document.getElementById("openPortsCount").textContent = `${ports.length} open`;
+portsTable.innerHTML = ports.length
+  ? ports.map((port) => `
+      <tr>
+        <td class="mono">${port.port}</td>
+        <td>${port.service || "Unknown"}</td>
+        <td><span class="badge-soft badge-low">${port.state}</span></td>
+      </tr>`).join("")
+  : `<tr><td colspan="3" class="text-muted-2 text-center py-3">No open ports detected</td></tr>`;
+
+// --- Recommendations -------------------------------------------------------
+const recommendationList = document.getElementById("recommendationsList");
+recommendationList.innerHTML = Array.isArray(ai.recommendations) && ai.recommendations.length
+  ? ai.recommendations.map((rec) => `<li>${rec}</li>`).join("")
+  : `<li class="text-muted-2">No recommendations — this target looks clean.</li>`;
+
+// --- Score gauges (computed live, not hardcoded) ----------------------------
+const securityScore = ai.security?.security_score ?? 0;
+const riskScore = ai.risk?.risk_score ?? 0;
+const exposureScore = ai.exposure?.exposure_score ?? 0;
+
+document.getElementById("securityScore").textContent = securityScore;
+document.getElementById("riskScore").textContent = riskScore;
+document.getElementById("exposureScore").textContent = exposureScore;
+
+window.Sentinel.setRing(document.getElementById("securityRing"), securityScore);
+window.Sentinel.setRing(document.getElementById("riskRing"), riskScore);
+window.Sentinel.setRing(document.getElementById("exposureRing"), exposureScore);
+</script>
+{% endblock %}

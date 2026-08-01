@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% set active_page = 'settings' %}
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+<div class="mb-4 reveal">
+  <h3 class="font-display fw-bold text-white mb-1">Settings</h3>
+  <p class="section-sub mb-0">Configure workspace preferences, integrations, and security.</p>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-3">
+    <div class="card-glass card-pad reveal" style="position:sticky; top:84px;">
+      <div class="nav flex-column gap-1" id="settingsTabs" role="tablist">
+        <button class="nav-link active text-start" data-bs-toggle="pill" data-bs-target="#tab-theme"><i class="fa-solid fa-palette"></i><span>Theme</span></button>
+        <button class="nav-link text-start" data-bs-toggle="pill" data-bs-target="#tab-notifications"><i class="fa-solid fa-bell"></i><span>Notifications</span></button>
+        <button class="nav-link text-start" data-bs-toggle="pill" data-bs-target="#tab-api"><i class="fa-solid fa-plug"></i><span>API</span></button>
+        <button class="nav-link text-start" data-bs-toggle="pill" data-bs-target="#tab-security"><i class="fa-solid fa-shield-halved"></i><span>Security</span></button>
+        <button class="nav-link text-start" data-bs-toggle="pill" data-bs-target="#tab-smtp"><i class="fa-solid fa-envelope"></i><span>SMTP</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-9">
+    <div class="tab-content">
+
+      <div class="tab-pane fade show active" id="tab-theme">
+        <div class="card-glass card-pad reveal">
+          <div class="section-title mb-3">Theme</div>
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <div class="p-3 text-center" style="background:var(--bg); border:2px solid var(--green); border-radius:12px;">
+                <div class="mb-2" style="height:50px; background:linear-gradient(135deg,#0B1220,#1F2937); border-radius:8px;"></div>
+                <div class="small fw-semibold">Dark (default)</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="p-3 text-center" style="background:var(--bg-elevated); border:1px solid var(--border-strong); border-radius:12px;">
+                <div class="mb-2" style="height:50px; background:linear-gradient(135deg,#F1F5F9,#E2E8F0); border-radius:8px;"></div>
+                <div class="small fw-semibold text-secondary">Light</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="p-3 text-center" style="background:var(--bg-elevated); border:1px solid var(--border-strong); border-radius:12px;">
+                <div class="mb-2" style="height:50px; background:linear-gradient(135deg,#0B1220,#111827); border-radius:8px;"></div>
+                <div class="small fw-semibold text-secondary">System</div>
+              </div>
+            </div>
+          </div>
+          <label class="form-label-dark d-block">Accent color</label>
+          <div class="d-flex gap-2">
+            <span style="width:28px; height:28px; border-radius:8px; background:var(--green); border:2px solid #fff;"></span>
+            <span style="width:28px; height:28px; border-radius:8px; background:var(--blue);"></span>
+            <span style="width:28px; height:28px; border-radius:8px; background:var(--purple);"></span>
+            <span style="width:28px; height:28px; border-radius:8px; background:var(--amber);"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="tab-notifications">
+        <div class="card-glass card-pad reveal">
+          <div class="section-title mb-3">Notifications</div>
+          {% for label, sub, checked in [
+            ('Critical vulnerability alerts','Notify immediately when a critical CVE is found', true),
+            ('Scan completion','Email when a scan finishes', true),
+            ('SSL expiry warnings','Notify 14 days before certificate expiry', true),
+            ('Weekly digest','Summary of posture changes every Monday', false)
+          ] %}
+          <div class="d-flex justify-content-between align-items-center py-3" style="border-bottom:1px solid var(--border);">
+            <div><div class="small fw-semibold text-white">{{ label }}</div><div class="small text-muted-2">{{ sub }}</div></div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" style="width:40px; height:22px;" {{ 'checked' if checked }}>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="tab-api">
+        <div class="card-glass card-pad reveal">
+          <div class="section-title mb-3">API Configuration</div>
+          <label class="form-label-dark d-block">Base API URL</label>
+          <input type="text" class="form-control form-control-dark mb-3" value="https://api.sentinelasm.io/v1">
+          <label class="form-label-dark d-block">Webhook endpoint</label>
+          <input type="text" class="form-control form-control-dark mb-3" placeholder="https://yourapp.com/webhooks/sentinel">
+          <label class="form-label-dark d-block">Rate limit</label>
+          <select class="form-select form-select-dark"><option>60 requests / min</option><option>120 requests / min</option><option>Unlimited (Enterprise)</option></select>
+          <button class="btn btn-sentinel mt-3"><i class="fa-solid fa-floppy-disk me-2"></i>Save API Settings</button>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="tab-security">
+        <div class="card-glass card-pad reveal">
+          <div class="section-title mb-3">Security</div>
+          <div class="d-flex justify-content-between align-items-center py-3" style="border-bottom:1px solid var(--border);">
+            <div><div class="small fw-semibold text-white">Two-factor authentication</div><div class="small text-muted-2">Require a code at sign-in</div></div>
+            <div class="form-check form-switch"><input class="form-check-input" type="checkbox" checked style="width:40px; height:22px;"></div>
+          </div>
+          <div class="d-flex justify-content-between align-items-center py-3" style="border-bottom:1px solid var(--border);">
+            <div><div class="small fw-semibold text-white">Enforce SSO for all members</div><div class="small text-muted-2">Require organization SSO login</div></div>
+            <div class="form-check form-switch"><input class="form-check-input" type="checkbox" style="width:40px; height:22px;"></div>
+          </div>
+          <div class="py-3">
+            <label class="form-label-dark d-block">Session timeout</label>
+            <select class="form-select form-select-dark" style="max-width:260px;"><option>30 minutes</option><option selected>4 hours</option><option>24 hours</option></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="tab-smtp">
+        <div class="card-glass card-pad reveal">
+          <div class="section-title mb-3">SMTP Configuration</div>
+          <div class="row g-3">
+            <div class="col-md-8"><label class="form-label-dark d-block">SMTP host</label><input type="text" class="form-control form-control-dark" placeholder="smtp.sendgrid.net"></div>
+            <div class="col-md-4"><label class="form-label-dark d-block">Port</label><input type="text" class="form-control form-control-dark" value="587"></div>
+            <div class="col-md-6"><label class="form-label-dark d-block">Username</label><input type="text" class="form-control form-control-dark"></div>
+            <div class="col-md-6"><label class="form-label-dark d-block">Password</label><input type="password" class="form-control form-control-dark"></div>
+          </div>
+          <div class="form-check mt-3">
+            <input class="form-check-input" type="checkbox" checked>
+            <label class="form-check-label small text-secondary">Use TLS encryption</label>
+          </div>
+          <button class="btn btn-sentinel mt-3"><i class="fa-solid fa-paper-plane me-2"></i>Send Test Email</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  #settingsTabs .nav-link{ display:flex; align-items:center; gap:10px; }
+  #settingsTabs .nav-link i{ width:16px; }
+</style>
+{% endblock %}

@@ -1,0 +1,35 @@
+{# Public-site navbar. Shared by landing.html and every marketing/legal page
+   so the header stays identical everywhere without duplicating markup. #}
+<header class="nav">
+  <div class="wrap nav-row">
+    <a class="brand" href="{{ url_for('index') }}">
+      <img src="{{ url_for('static', filename='img/logo-mark.svg') }}" alt="" width="30" height="30">
+      Sentinel<span>ASM</span>
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="{{ url_for('index') }}#features">Features</a>
+      <a href="{{ url_for('index') }}#how-it-works">How it works</a>
+      <a href="{{ url_for('index') }}#team">Team</a>
+      <a href="{{ url_for('index') }}#pricing">Pricing</a>
+      <a href="{{ url_for('index') }}#faq">FAQ</a>
+      <a href="{{ url_for('docs') }}">Docs</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="btn btn-ghost" href="{{ url_for('auth.login') }}">Sign in</a>
+      <a class="btn btn-primary" href="{{ url_for('auth.register') }}">Start free scan</a>
+      <button class="nav-toggle js-nav-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobileNav">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+  </div>
+  <nav id="mobileNav" class="mobile-nav js-mobile-nav" aria-label="Mobile">
+    <a href="{{ url_for('index') }}#features">Features</a>
+    <a href="{{ url_for('index') }}#how-it-works">How it works</a>
+    <a href="{{ url_for('index') }}#team">Team</a>
+    <a href="{{ url_for('index') }}#pricing">Pricing</a>
+    <a href="{{ url_for('index') }}#faq">FAQ</a>
+    <a href="{{ url_for('docs') }}">Docs</a>
+    <a href="{{ url_for('auth.login') }}">Sign in</a>
+    <a href="{{ url_for('auth.register') }}">Start free scan</a>
+  </nav>
+</header>

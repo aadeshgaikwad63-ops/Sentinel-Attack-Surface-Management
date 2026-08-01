@@ -1,0 +1,20 @@
+<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="sentinelLogoTitle">
+  <title id="sentinelLogoTitle">SentinelASM</title>
+  <defs>
+    <linearGradient id="sasm-mark-grad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3fb950"/>
+      <stop offset="1" stop-color="#58a6ff"/>
+    </linearGradient>
+  </defs>
+  <!-- hexagon perimeter = the monitored boundary -->
+  <path d="M20 2 L36 11 V29 L20 38 L4 29 V11 Z" fill="none" stroke="url(#sasm-mark-grad)" stroke-width="1.6" stroke-linejoin="round"/>
+  <!-- node/edge network tracing a negative-space S: the discovered asset graph -->
+  <g stroke="url(#sasm-mark-grad)" stroke-width="1.6" stroke-linecap="round" fill="none">
+    <path d="M28 12.5 C28 9.5 24.6 8 21 8 C17 8 14 9.6 14 12.4 C14 19.2 27 18.8 27 25.6 C27 28.6 23.6 30.4 20 30.4 C16.2 30.4 12.6 28.8 12.4 25.6"/>
+  </g>
+  <circle cx="28" cy="12.5" r="2.4" fill="#0b0f14" stroke="url(#sasm-mark-grad)" stroke-width="1.4"/>
+  <circle cx="14" cy="12.4" r="2.1" fill="#3fb950"/>
+  <circle cx="27" cy="21" r="1.8" fill="#d29922"/>
+  <circle cx="20" cy="30.4" r="2.1" fill="#58a6ff"/>
+  <circle cx="12.4" cy="25.6" r="2.4" fill="#0b0f14" stroke="url(#sasm-mark-grad)" stroke-width="1.4"/>
+</svg>

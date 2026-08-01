@@ -1,0 +1,353 @@
+{% extends "base.html" %}
+
+{% set active_page = 'dashboard' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- ============================= HERO ============================= -->
+<div class="dash-hero reveal mb-4">
+  <div class="dash-hero-glow"></div>
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 position-relative">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <span class="live-dot"></span>
+        <span class="small text-muted-2 text-uppercase" style="letter-spacing:.08em;">Live security posture</span>
+      </div>
+      <h2 class="font-display fw-bold text-white mb-1">
+        Welcome back, {{ (current_user.full_name or current_user.username).split(' ')[0] }}
+      </h2>
+      <p class="section-sub mb-0" id="heroSub">
+        {% if overview.has_data %}
+        Monitoring <strong class="text-white">{{ overview.kpis.total_assets }}</strong> asset{{ 's' if overview.kpis.total_assets != 1 }} across
+        <strong class="text-white">{{ overview.kpis.total_scans }}</strong> scan{{ 's' if overview.kpis.total_scans != 1 }} — last activity {{ overview.latest.target }}.
+        {% else %}
+        Your attack surface command center. Run your first scan to bring every widget below to life.
+        {% endif %}
+      </p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <button type="button" id="refreshDashboardBtn" class="btn btn-ghost" title="Refresh dashboard data">
+        <i class="fa-solid fa-rotate me-2"></i>Refresh
+      </button>
+      <a href="{{ url_for('scanner.new_scan') }}" class="btn btn-sentinel">
+        <i class="fa-solid fa-magnifying-glass-chart me-2"></i>Run New Scan
+      </a>
+      <a href="{{ url_for('reports.reports') }}" class="btn btn-ghost">
+        <i class="fa-solid fa-file-arrow-down me-2"></i>Export Report
+      </a>
+    </div>
+  </div>
+
+  {% if overview.has_data %}
+  <div class="dash-hero-strip position-relative">
+    <div class="dash-hero-metric">
+      <span class="dash-hero-metric-val" style="color:{{ 'var(--green)' if overview.kpis.avg_security_score and overview.kpis.avg_security_score >= 75 else ('var(--amber)' if overview.kpis.avg_security_score and overview.kpis.avg_security_score >= 50 else 'var(--red)') }}">
+        {{ overview.kpis.avg_security_score if overview.kpis.avg_security_score is not none else '-' }}
+      </span>
+      <span class="dash-hero-metric-lbl">Avg security score</span>
+    </div>
+    <div class="dash-hero-metric">
+      <span class="dash-hero-metric-val" style="color:var(--red)">{{ overview.kpis.critical_open }}</span>
+      <span class="dash-hero-metric-lbl">Critical CVEs open</span>
+    </div>
+    <div class="dash-hero-metric">
+      <span class="dash-hero-metric-val" style="color:var(--blue)">{{ overview.compliance.percent if overview.compliance.percent is not none else '-' }}{{ '%' if overview.compliance.percent is not none }}</span>
+      <span class="dash-hero-metric-lbl">Compliant assets</span>
+    </div>
+    <div class="dash-hero-metric">
+      <span class="dash-hero-metric-val" style="color:var(--accent)">{{ overview.kpis.scans_this_week }}</span>
+      <span class="dash-hero-metric-lbl">Scans this week</span>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+{% if not overview.has_data %}
+
+<div class="card-glass reveal">
+  <div class="empty-state">
+    <div class="icon-shield icon-primary mx-auto">
+      <i class="fa-solid fa-satellite-dish"></i>
+    </div>
+    <h4 class="font-display fw-bold text-white mb-2">No scans yet</h4>
+    <p class="section-sub mb-4">
+      Run your first scan to populate the security score, risk gauges, and every
+      widget on this dashboard with real data for your assets.
+    </p>
+    <a href="{{ url_for('scanner.new_scan') }}" class="btn btn-sentinel">
+      <i class="fa-solid fa-magnifying-glass-chart me-2"></i>Run Your First Scan
+    </a>
+  </div>
+</div>
+
+{% else %}
+
+<!-- KPI ROW -->
+<div class="row g-3 mb-3">
+
+  <div class="col-xl-3 col-md-6">
+    <div class="card-glass card-pad h-100 reveal stat-card">
+      <div class="stat-card-icon" style="background:var(--accent-glow); color:var(--accent);"><i class="fa-solid fa-server"></i></div>
+      <div class="stat-label">Total Assets</div>
+      <div id="kpiTotalAssets" class="stat-value" data-count="{{ overview.kpis.total_assets }}">0</div>
+      <div class="small text-muted-2">Distinct targets monitored</div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-md-6">
+    <div class="card-glass card-pad h-100 reveal stat-card" style="animation-delay:40ms">
+      <div class="stat-card-icon" style="background:var(--blue-glow); color:var(--blue);"><i class="fa-solid fa-magnifying-glass"></i></div>
+      <div class="stat-label">Total Scans</div>
+      <div id="kpiTotalScans" class="stat-value" data-count="{{ overview.kpis.total_scans }}">0</div>
+      <div class="small text-muted-2">Lifetime scans run</div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-md-6">
+    <div class="card-glass card-pad h-100 reveal stat-card" style="animation-delay:80ms">
+      <div class="stat-card-icon" style="background:var(--green-glow); color:var(--green);"><i class="fa-solid fa-shield-halved"></i></div>
+      <div class="stat-label">Avg Security Score</div>
+      <div id="kpiAvgSecurity" class="stat-value" style="color:var(--green)" data-count="{{ overview.kpis.avg_security_score or 0 }}">
+        {{ '0' if overview.kpis.avg_security_score is not none else '-' }}
+      </div>
+      <div class="small text-muted-2">Across all current assets</div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-md-6">
+    <div class="card-glass card-pad h-100 reveal stat-card" style="animation-delay:120ms">
+      <div class="stat-card-icon" style="background:var(--red-glow); color:var(--red);"><i class="fa-solid fa-bug"></i></div>
+      <div class="stat-label">Critical Issues Open</div>
+      <div id="kpiCriticalOpen" class="stat-value" style="color:var(--red)" data-count="{{ overview.kpis.critical_open }}">0</div>
+      <div class="small text-muted-2">Critical CVEs, latest scans</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-xl-3 col-md-6">
+    <div class="card-glass card-pad h-100 reveal stat-card" style="animation-delay:160ms">
+      <div class="stat-card-icon" style="background:var(--purple-glow); color:var(--purple);"><i class="fa-solid fa-calendar-week"></i></div>
+      <div class="stat-label">Scans This Week</div>
+      <div id="kpiScansWeek" class="stat-value" style="color:var(--blue)" data-count="{{ overview.kpis.scans_this_week }}">0</div>
+      <div id="kpiScansDelta" class="kpi-delta text-secondary">-</div>
+    </div>
+  </div>
+
+  <!-- EXECUTIVE SUMMARY -->
+  <div class="col-xl-9">
+    <div class="card-glass card-pad h-100 reveal" style="animation-delay:200ms">
+      <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+        <div class="section-title"><i class="fa-solid fa-file-shield me-2" style="color:var(--blue)"></i>Executive Summary</div>
+        <span class="chip-target" id="execTarget">{{ overview.latest.target }}</span>
+      </div>
+      <p id="execSummary" class="small text-secondary mb-2" style="white-space: pre-line;">{{ overview.latest.summary or 'No summary available for this scan.' }}</p>
+      <div id="execMeta" class="small text-muted-2">
+        Threat level: {{ overview.latest.threat_level or '-' }} · Business impact: {{ overview.latest.business_impact or '-' }}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GAUGES -->
+<div class="row g-3 mb-3">
+  <div class="col-xl-3 col-md-6">
+    <div class="card-glass card-pad h-100 text-center reveal">
+      <div class="section-title mb-2">Security Score</div>
+      <div class="sweep-ring mx-auto mb-2">
+        <svg width="132" height="132" viewBox="0 0 132 132">
+          <circle class="track" cx="66" cy="66" r="56"></circle>
+          <circle id="securityGaugeRing" class="progress" cx="66" cy="66" r="56"
+                  stroke-dasharray="352" stroke-dashoffset="352"></circle>
+        </svg>
+        <div class="core">
+          <span class="val" id="securityScore">0</span>
+          <span class="lbl" id="securityGrade">-</span>
+        </div>
+      </div>
+      <div class="small text-muted-2" id="securityRating">AI calculated security rating</div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-md-6">
+    <div class="card-glass card-pad h-100 text-center reveal" style="animation-delay:40ms">
+      <div class="section-title mb-2">Risk Score</div>
+      <div class="sweep-ring mx-auto mb-2">
+        <svg width="132" height="132" viewBox="0 0 132 132">
+          <circle class="track" cx="66" cy="66" r="56"></circle>
+          <circle id="riskGaugeRing" class="progress" cx="66" cy="66" r="56"
+                  stroke-dasharray="352" stroke-dashoffset="352"></circle>
+        </svg>
+        <div class="core">
+          <span class="val" id="riskScore">0</span>
+          <span class="lbl" id="riskSeverity">-</span>
+        </div>
+      </div>
+      <div class="small text-muted-2">Higher means more risk</div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-md-6">
+    <div class="card-glass card-pad h-100 reveal" style="animation-delay:80ms">
+      <div class="section-title mb-2">Compliance Status</div>
+      <div class="chart-wrap" style="height:150px">
+        <canvas id="complianceChart"></canvas>
+        <div class="chart-center-label">
+          <span class="val" id="complianceLabel">-</span>
+          <span class="lbl">≥ 75 score</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-md-6">
+    <div class="card-glass card-pad h-100 reveal" style="animation-delay:120ms">
+      <div class="section-title mb-2">Severity Distribution</div>
+      <div class="chart-wrap" style="height:150px">
+        <canvas id="severityPieChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ASSET OVERVIEW -->
+<div class="row g-3 mb-3">
+  <div class="col-12">
+    <div class="card-glass reveal">
+      <div class="card-pad pb-0">
+        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+          <div class="section-title"><i class="fa-solid fa-cubes me-2" style="color:var(--accent)"></i>Asset Overview</div>
+          <a href="{{ url_for('assets.assets') }}" class="small text-muted-2 text-decoration-none">View all assets <i class="fa-solid fa-arrow-right ms-1"></i></a>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table-sentinel mb-0">
+          <thead>
+            <tr>
+              <th>Asset</th>
+              <th>Security</th>
+              <th>Risk</th>
+              <th>Open Ports</th>
+              <th>Critical CVEs</th>
+              <th>Last Scanned</th>
+            </tr>
+          </thead>
+          <tbody id="assetOverviewBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CHARTS ROW 1 -->
+<div class="row g-3 mb-3">
+  <div class="col-xl-6">
+    <div class="card-glass card-pad reveal">
+      <div class="section-title mb-2">Risk &amp; Security Trend</div>
+      <div class="chart-wrap" style="height:220px">
+        <canvas id="riskTrendChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3">
+    <div class="card-glass card-pad reveal" style="animation-delay:40ms">
+      <div class="section-title mb-2">CVE Distribution</div>
+      <div class="chart-wrap" style="height:220px">
+        <canvas id="cveDistributionChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3">
+    <div class="card-glass card-pad reveal" style="animation-delay:80ms">
+      <div class="section-title mb-2">Open Port Statistics</div>
+      <div class="chart-wrap" style="height:220px">
+        <canvas id="openPortsChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CHARTS ROW 2 -->
+<div class="row g-3 mb-3">
+  <div class="col-xl-6">
+    <div class="card-glass card-pad reveal">
+      <div class="section-title mb-2">Weekly Scan Trend</div>
+      <div class="chart-wrap" style="height:200px">
+        <canvas id="weeklyScanTrendChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-6">
+    <div class="card-glass card-pad reveal" style="animation-delay:40ms">
+      <div class="section-title mb-2">Asset Growth</div>
+      <div class="chart-wrap" style="height:200px">
+        <canvas id="assetGrowthChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCAN HISTORY + THREAT TIMELINE -->
+<div class="row g-3 mb-3">
+
+  <div class="col-xl-8">
+    <div class="card-glass reveal h-100">
+      <div class="card-pad pb-0">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="section-title">Scan History</div>
+          <span class="small text-muted-2">Last {{ overview.scan_history|length }} scans</span>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table-sentinel mb-0">
+          <thead>
+            <tr>
+              <th>Target</th>
+              <th>When</th>
+              <th>Risk</th>
+              <th>Security</th>
+              <th>Severity</th>
+            </tr>
+          </thead>
+          <tbody id="scanHistoryBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-4">
+    <div class="card-glass card-pad reveal h-100">
+      <div class="section-title mb-3"><i class="fa-solid fa-clock-rotate-left me-2" style="color:var(--accent)"></i>Threat Timeline</div>
+      <ul class="timeline-list" id="activityList"></ul>
+    </div>
+  </div>
+
+</div>
+
+<!-- TOP VULNERABILITIES -->
+<div class="row g-3">
+  <div class="col-12">
+    <div class="card-glass card-pad reveal">
+      <div class="section-title mb-3"><i class="fa-solid fa-triangle-exclamation me-2" style="color:var(--amber)"></i>Top Vulnerabilities</div>
+      <div id="topVulnList"></div>
+    </div>
+  </div>
+</div>
+
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+  window.SENTINEL_OVERVIEW = {{ overview | tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

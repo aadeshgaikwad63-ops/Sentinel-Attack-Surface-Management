@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% set active_page = 'assets' %}
+{% block title %}Asset Management{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4 reveal">
+  <div>
+    <h3 class="font-display fw-bold text-white mb-1">Asset Management</h3>
+    <p class="section-sub mb-0">Every domain, subdomain, and host SentinelASM is monitoring.</p>
+  </div>
+  <button class="btn btn-sentinel" data-bs-toggle="modal" data-bs-target="#addAssetModal">
+    <i class="fa-solid fa-plus me-2"></i>Add Asset
+  </button>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-3 col-6"><div class="card-glass card-pad reveal stat-card"><div class="stat-label">Domains</div><div class="stat-value">{{ stats.domains }}</div></div></div>
+  <div class="col-md-3 col-6"><div class="card-glass card-pad reveal stat-card" style="animation-delay:40ms"><div class="stat-label">Subdomains</div><div class="stat-value">{{ stats.subdomains }}</div></div></div>
+  <div class="col-md-3 col-6"><div class="card-glass card-pad reveal stat-card" style="animation-delay:80ms"><div class="stat-label">IP Addresses</div><div class="stat-value">{{ stats.ips }}</div></div></div>
+  <div class="col-md-3 col-6"><div class="card-glass card-pad reveal stat-card" style="animation-delay:120ms"><div class="stat-label" style="color:var(--red)">At Risk</div><div class="stat-value" style="color:var(--red)">{{ stats.at_risk }}</div></div></div>
+</div>
+
+<div class="card-glass reveal">
+  <div class="card-pad pb-2 d-flex flex-wrap gap-2 justify-content-between align-items-center">
+    <div class="d-flex gap-2 flex-wrap">
+      <div class="search-shell" style="width:260px;">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="assetSearch" class="form-control form-control-dark" placeholder="Search by name or technology…">
+      </div>
+      <select id="assetTypeFilter" class="form-select form-select-dark" style="width:auto;">
+        <option value="all">All types</option><option value="domain">Domain</option><option value="subdomain">Subdomain</option>
+      </select>
+      <select id="assetRiskFilter" class="form-select form-select-dark" style="width:auto;">
+        <option value="all">All risk levels</option><option value="critical">Critical</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option>
+      </select>
+    </div>
+    <div class="d-flex gap-2">
+      <div class="dropdown">
+        <button class="btn btn-ghost btn-sm" data-bs-toggle="dropdown"><i class="fa-solid fa-file-export me-2"></i>Export</button>
+        <ul class="dropdown-menu dropdown-menu-end p-2" style="background:var(--card); border:1px solid var(--border-strong); border-radius:10px;">
+          <li><a class="dropdown-item small py-2" id="assetExportAllCsv" href="#" style="color:var(--text-primary); border-radius:8px;"><i class="fa-solid fa-file-csv me-2"></i>Export CSV</a></li>
+          <li><a class="dropdown-item small py-2" id="assetExportAllJson" href="#" style="color:var(--text-primary); border-radius:8px;"><i class="fa-solid fa-file-code me-2"></i>Export JSON</a></li>
+        </ul>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="assetsRefresh"><i class="fa-solid fa-arrows-rotate me-2"></i>Refresh</button>
+    </div>
+  </div>
+
+  <!-- Bulk action bar — appears only while rows are selected -->
+  <div id="assetBulkBar" class="card-pad py-2 d-none align-items-center gap-3" style="display:none; border-top:1px solid var(--border); border-bottom:1px solid var(--border); background:rgba(62,142,247,.06);">
+    <span class="small fw-semibold" id="assetBulkCount">0 selected</span>
+    <div class="d-flex gap-2 ms-auto">
+      <button class="btn btn-ghost btn-sm" id="assetBulkExportCsv"><i class="fa-solid fa-file-csv me-2"></i>Export CSV</button>
+      <button class="btn btn-ghost btn-sm" id="assetBulkExportJson"><i class="fa-solid fa-file-code me-2"></i>Export JSON</button>
+      <button class="btn btn-ghost btn-sm" id="assetBulkClear"><i class="fa-solid fa-xmark me-2"></i>Clear</button>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table-sentinel align-middle" id="assetsTable">
+      <thead>
+        <tr>
+          <th><input class="form-check-input" type="checkbox" id="selectAllAssets" {{ '' if assets else 'disabled' }}></th>
+          <th data-sort-key="name">Asset <i class="sort-icon fa-solid fa-sort ms-1 text-muted-2"></i></th>
+          <th data-sort-key="type">Type <i class="sort-icon fa-solid fa-sort ms-1 text-muted-2"></i></th>
+          <th>IP Address</th>
+          <th>Technology</th>
+          <th>Open Ports</th>
+          <th>SSL</th>
+          <th data-sort-key="risk">Risk <i class="sort-icon fa-solid fa-sort ms-1 text-muted-2"></i></th>
+          <th data-sort-key="scanned">Last Scanned <i class="sort-icon fa-solid fa-sort ms-1 text-muted-2"></i></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for name, type, ip, tech, ports, risk, scanned, ssl in assets %}
+        <tr class="asset-row"
+            data-name="{{ name|lower }}" data-type="{{ type|lower }}" data-ip="{{ ip }}"
+            data-tech="{{ tech|lower }}" data-ports="{{ ports }}" data-risk="{{ risk|lower }}"
+            data-scanned="{{ scanned }}" data-ssl="{{ ssl|lower }}">
+          <td><input class="form-check-input row-check" type="checkbox"></td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <img src="https://www.google.com/s2/favicons?sz=64&domain={{ name }}" width="16" height="16" alt="" style="border-radius:3px; flex-shrink:0;" onerror="this.style.visibility='hidden'">
+              <a href="{{ url_for('scanner.scan_results') }}" class="mono fw-semibold text-white">{{ name }}</a>
+            </div>
+          </td>
+          <td><span class="text-secondary">{{ type }}</span></td>
+          <td class="mono text-secondary">{{ ip }}</td>
+          <td>
+            {% if tech and tech != 'Unknown' %}
+              <span class="badge-soft badge-medium tech-badge"><i class="tech-icon me-1"></i>{{ tech }}</span>
+            {% else %}
+              <span class="text-muted-2">Unknown</span>
+            {% endif %}
+          </td>
+          <td class="mono">{{ ports }}</td>
+          <td><span class="badge-soft badge-{{ {'valid':'low','expired':'critical','self-signed':'high','none':'suspended'}[ssl|lower] }}">{{ ssl }}</span></td>
+          <td><span class="badge-soft badge-{{ risk|lower }}">{{ risk }}</span></td>
+          <td class="text-secondary">{{ scanned }}</td>
+          <td class="text-end">
+            <div class="dropdown">
+              <button class="icon-btn" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+              <ul class="dropdown-menu dropdown-menu-end p-2" style="background:var(--card); border:1px solid var(--border-strong); border-radius:10px;">
+                <li><a class="dropdown-item small py-2" href="{{ url_for('scanner.scan_results') }}" style="color:var(--text-primary); border-radius:8px;"><i class="fa-solid fa-eye me-2"></i>View Results</a></li>
+                <li><a class="dropdown-item small py-2" href="{{ url_for('scanner.new_scan', target=name) }}" style="color:var(--text-primary); border-radius:8px;"><i class="fa-solid fa-rotate me-2"></i>Rescan</a></li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="10" class="text-center text-muted-2 py-4">No assets yet — run your first scan from New Scan to start building your inventory.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="card-pad pt-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <span class="small text-muted-2" id="assetsSummary">Showing {{ assets|length }} of {{ assets|length }} assets</span>
+    <nav><ul class="pagination pagination-sm mb-0" id="assetsPagination"></ul></nav>
+  </div>
+</div>
+
+<!-- Add Asset Modal -->
+<div class="modal fade" id="addAssetModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background:var(--card); border:1px solid var(--border-strong); border-radius:16px;">
+      <div class="modal-header" style="border-color:var(--border);">
+        <h5 class="modal-title font-display fw-bold text-white">Add New Asset</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="{{ url_for('assets.assets') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="modal-body">
+          <label class="form-label-dark d-block">Domain or IP address</label>
+          <input type="text" name="target" class="form-control form-control-dark mb-3" placeholder="e.g. shop.acme.com">
+          <label class="form-label-dark d-block">Asset type</label>
+          <select class="form-select form-select-dark">
+            <option>Domain</option><option>Subdomain</option><option>IP Address</option>
+          </select>
+        </div>
+        <div class="modal-footer" style="border-color:var(--border);">
+          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-sentinel">Add Asset</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/assets.js') }}"></script>
+{% endblock %}

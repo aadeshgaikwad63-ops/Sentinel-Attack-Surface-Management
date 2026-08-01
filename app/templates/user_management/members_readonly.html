@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% set active_page = 'user_management' %}
+{% block title %}Organization Members{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4 reveal">
+  <div>
+    <h3 class="font-display fw-bold text-white mb-1">Organization Members</h3>
+    <p class="section-sub mb-0">Read-only view — ask an administrator for role or access changes.</p>
+  </div>
+  <span class="badge-soft badge-viewer"><i class="fa-solid fa-lock me-1"></i>{{ current_user.role.name|capitalize if current_user.role else 'Viewer' }} access</span>
+</div>
+
+<div class="card-glass reveal mb-4">
+  <div class="card-pad">
+    <div class="d-flex flex-wrap align-items-center gap-3">
+      <img src="https://i.pravatar.cc/72?img={{ (current_user.id % 70) + 1 }}" class="rounded-circle" width="56" height="56" alt="{{ current_user.username }}">
+      <div class="flex-grow-1">
+        <div class="fw-semibold text-white">{{ current_user.full_name or current_user.username }}</div>
+        <div class="small text-muted-2">{{ current_user.email }}</div>
+      </div>
+      <span class="badge-soft badge-{{ (current_user.role.name if current_user.role else 'viewer')|lower }}">
+        {{ current_user.role.name|capitalize if current_user.role else 'Viewer' }}
+      </span>
+      <span class="badge-soft badge-active">Active</span>
+    </div>
+  </div>
+</div>
+
+<div class="card-glass reveal">
+  <div class="card-pad pb-2 d-flex flex-wrap gap-2 justify-content-between align-items-center">
+    <div>
+      <h6 class="text-white fw-semibold mb-0">Team Members</h6>
+      <p class="small text-muted-2 mb-0">{{ member_count }} total members in your organization</p>
+    </div>
+    <div class="search-shell" style="width:260px;">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" class="form-control form-control-dark" id="memberSearch" placeholder="Search members…" onkeyup="filterMembers()">
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table-sentinel align-middle" id="membersTable">
+      <thead>
+        <tr><th>User</th><th>Role</th><th>Status</th><th>Last Active</th></tr>
+      </thead>
+      <tbody>
+        {% for name, email, av, role, status, active in members %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <img src="https://i.pravatar.cc/64?img={{ av }}" class="rounded-circle" width="34" height="34" alt="{{ name }}">
+              <div>
+                <div class="fw-semibold small text-white">{{ name }}</div>
+                <div class="small text-muted-2">{{ email }}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="badge-soft badge-{{ role|lower }}">{{ role }}</span></td>
+          <td><span class="badge-soft badge-{{ status|lower }}">{{ status }}</span></td>
+          <td class="text-secondary">{{ active }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="text-center text-muted-2 py-4">No other members in your organization yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+function filterMembers() {
+  const q = document.getElementById('memberSearch').value.toLowerCase();
+  document.querySelectorAll('#membersTable tbody tr').forEach(function (row) {
+    row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+</script>
+{% endblock %}
