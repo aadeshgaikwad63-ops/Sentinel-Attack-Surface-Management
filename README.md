@@ -304,3 +304,5 @@ with app.app_context():
   the blueprints already registered there.
 - If you need new user-facing fields or tables, extend the existing
   models/migrations — do not create parallel/duplicate tables.
+#   S e n t i n e l A S M  
+ 
